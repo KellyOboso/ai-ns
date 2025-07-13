@@ -1,0 +1,199 @@
+{
+    "messages": [
+        {
+            "sender": "bot",
+            "content": "Hi there! How can I support you today?"
+        },
+        {
+            "sender": "user",
+            "content": "hi"
+        },
+        {
+            "sender": "bot",
+            "content": "Hi! What's on your mind?"
+        },
+        {
+            "sender": "user",
+            "content": "I'm depressed"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "I'm depressed"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "I'm not okay"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "hey"
+        },
+        {
+            "sender": "bot",
+            "content": "Hey! How are you feeling today?"
+        },
+        {
+            "sender": "user",
+            "content": "hey"
+        },
+        {
+            "sender": "bot",
+            "content": "Hey! How are you feeling today?"
+        },
+        {
+            "sender": "user",
+            "content": "I'm not okay"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "I'm depressed"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "Hi"
+        },
+        {
+            "sender": "bot",
+            "content": "Hi! What's on your mind?"
+        },
+        {
+            "sender": "user",
+            "content": "Hi"
+        },
+        {
+            "sender": "bot",
+            "content": "Hi! What's on your mind?"
+        },
+        {
+            "sender": "user",
+            "content": "I'm depressed "
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "hey"
+        },
+        {
+            "sender": "bot",
+            "content": "Hey! How are you feeling today?"
+        },
+        {
+            "sender": "user",
+            "content": "I'm not okay"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "I'm depressed"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "I'm depressed"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "I feel down"
+        },
+        {
+            "sender": "bot",
+            "content": "It's okay to not be okay. Allow yourself to feel."
+        },
+        {
+            "sender": "user",
+            "content": "how can I calm down?"
+        },
+        {
+            "sender": "bot",
+            "content": "Taking slow, deep breaths or grounding yourself in the present can help. Would you like a simple grounding exercise?"
+        },
+        {
+            "sender": "user",
+            "content": "hello"
+        },
+        {
+            "sender": "bot",
+            "content": "Hello! I'm here to listen. How are you doing?"
+        },
+        {
+            "sender": "user",
+            "content": "hello"
+        },
+        {
+            "sender": "bot",
+            "content": "Hello! I'm here to listen. How are you doing?"
+        },
+        {
+            "sender": "user",
+            "content": "How can I calm down?"
+        },
+        {
+            "sender": "bot",
+            "content": "Taking slow, deep breaths or grounding yourself in the present can help. Would you like a simple grounding exercise?"
+        },
+        {
+            "sender": "user",
+            "content": "Advice me "
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "what does this bot do?"
+        },
+        {
+            "sender": "bot",
+            "content": "I'm here to listen. Tell me more about what's on your mind."
+        },
+        {
+            "sender": "user",
+            "content": "what does this bot do?"
+        },
+        {
+            "sender": "bot",
+            "content": "I\u2019m here to support your mental well-being by listening to you and offering helpful responses when you need someone to talk to."
+        }
+    ],
+    "logged_in": true,
+    "current_user": {
+        "id": 1,
+        "username": "Kelly",
+        "email": "kellyoboso@gmail.com"
+    },
+    "conversation_id": 216
+}
