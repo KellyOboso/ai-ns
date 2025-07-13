@@ -3,28 +3,14 @@ import sqlite3
 import bcrypt
 from pathlib import Path
 import logging
-import json
 import re
 
 logging.getLogger('watchdog').setLevel(logging.WARNING)
 
-SESSION_FILE = "session_data.json"
 DB_PATH = Path("mental_health_chatbot.db")
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("MentalHealthBot")
-
-
-def load_session():
-    if Path(SESSION_FILE).exists():
-        with open(SESSION_FILE, "r") as f:
-            return json.load(f)
-    return {}
-
-
-def save_session(data):
-    with open(SESSION_FILE, "w") as f:
-        json.dump(data, f, indent=4)
 
 
 @st.cache_resource
@@ -183,7 +169,6 @@ def get_bot_response(user_input):
         if row:
             return row[0]
 
-        # Keyword fallback
         keywords = text.split()
         for word in keywords:
             cursor.execute("SELECT bot_response FROM bot_responses WHERE user_input LIKE ?", (f"%{word}%",))
@@ -260,11 +245,6 @@ def show_register():
 def main():
     init_db()
 
-    saved = load_session()
-    for k in ["logged_in", "current_user"]:
-        if k in saved:
-            st.session_state[k] = saved[k]
-
     for k in ["logged_in", "current_user", "show_login", "show_register"]:
         if k not in st.session_state:
             st.session_state[k] = False if k == "logged_in" else None
@@ -276,13 +256,12 @@ def main():
         with top:
             st.markdown(
                 f"### 👤 {st.session_state.current_user['username']}"
-                if st.session_state.logged_in else "### Please log in"
+                if st.session_state.logged_in and st.session_state.current_user else "### Please log in"
             )
             if st.session_state.logged_in:
                 if st.button("🚪 Logout"):
                     for k in ["messages", "logged_in", "current_user", "conversation_id"]:
                         st.session_state[k] = None if k != "logged_in" else False
-                    save_session({})
                     st.rerun()
             else:
                 if st.button("Login"):
@@ -292,36 +271,38 @@ def main():
 
         with mid:
             st.markdown("### 📜 Chat History")
-            chat_history = get_conversation_history()
-            if chat_history:
-                history_container = st.container()
-                for cid, created_at in chat_history:
-                    cols = history_container.columns([3, 1])
-                    if cols[0].button(f"{created_at[:19]}", key=f"conv_{cid}"):
-                        st.session_state.conversation_id = cid
-                        load_conversation(cid)
-                        st.rerun()
-                    if cols[1].button("🗑️", key=f"del_{cid}"):
-                        delete_conversation(cid)
+            chat_history = []
+            if st.session_state.logged_in and st.session_state.current_user:
+                chat_history = get_conversation_history()
+                if chat_history:
+                    history_container = st.container()
+                    for cid, created_at in chat_history:
+                        cols = history_container.columns([3, 1])
+                        if cols[0].button(f"{created_at[:19]}", key=f"conv_{cid}"):
+                            st.session_state.conversation_id = cid
+                            load_conversation(cid)
+                            st.rerun()
+                        if cols[1].button("🗑️", key=f"del_{cid}"):
+                            delete_conversation(cid)
+                            st.session_state.messages = []
+                            st.session_state.conversation_id = None
+                            st.rerun()
+                    if st.button("🗑️ Clear All History"):
+                        with sqlite3.connect(DB_PATH) as conn:
+                            cursor = conn.cursor()
+                            cursor.execute(
+                                "DELETE FROM messages WHERE conversation_id IN "
+                                "(SELECT id FROM conversations WHERE user_id = ?)",
+                                (st.session_state.current_user['id'],)
+                            )
+                            cursor.execute(
+                                "DELETE FROM conversations WHERE user_id = ?",
+                                (st.session_state.current_user['id'],)
+                            )
+                            conn.commit()
                         st.session_state.messages = []
                         st.session_state.conversation_id = None
                         st.rerun()
-                if st.button("🗑️ Clear All History"):
-                    with sqlite3.connect(DB_PATH) as conn:
-                        cursor = conn.cursor()
-                        cursor.execute(
-                            "DELETE FROM messages WHERE conversation_id IN "
-                            "(SELECT id FROM conversations WHERE user_id = ?)",
-                            (st.session_state.current_user['id'],)
-                        )
-                        cursor.execute(
-                            "DELETE FROM conversations WHERE user_id = ?",
-                            (st.session_state.current_user['id'],)
-                        )
-                        conn.commit()
-                    st.session_state.messages = []
-                    st.session_state.conversation_id = None
-                    st.rerun()
 
     if st.session_state.show_register:
         show_register()
