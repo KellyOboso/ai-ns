@@ -18,8 +18,6 @@ import pandas as pd
 load_dotenv() 
 
 # --- NLTK Downloads (for TextBlob in app.py) ---
-# Check if NLTK data is already downloaded before attempting to download
-# This prevents repeated downloads and potential issues
 try:
     nltk.data.find('tokenizers/punkt')
 except nltk.downloader.DownloadError:
@@ -61,15 +59,16 @@ RESOURCES_AND_CRISIS_FILE = os.path.join(DATA_DIR, 'resources_and_crisis.yml')
 USER_FEEDBACK_FILE = os.path.join(DATA_DIR, 'user_feedback.yml')
 FALLBACKS_FILE = os.path.join(DATA_DIR, 'fallbacks.yml') 
 
-# --- Global Data Loading ---
+# --- Global Data Loading (Cached) ---
 
+# Use global variables to hold cached resources and models
 GLOBAL_RESOURCES = {}
 CLASSIFIER_MODEL = None
 LABEL_ENCODER = None 
 
 @st.cache_data(show_spinner="Loading AI knowledge base...")
-def load_yaml(filepath):
-    """Loads a YAML file from the specified path."""
+def load_yaml_cached(filepath): # Renamed to avoid confusion with internal load_yaml in init_admin_data
+    """Loads a YAML file from the specified path, designed for caching."""
     try:
         with open(filepath, 'r', encoding='utf-8') as file:
             return yaml.safe_load(file)
@@ -81,53 +80,54 @@ def load_yaml(filepath):
         return None
 
 @st.cache_resource(show_spinner="Loading all bot resources...")
-def load_all_resources():
+def load_all_resources_cached(): # Renamed to clearly indicate it's the cached version
     """Loads all YAML resource files into GLOBAL_RESOURCES."""
-    global GLOBAL_RESOURCES 
     
+    resources_dict = {} # Use a local dict to build, then assign to global
+
     # Load Intents - Store as a dictionary for easy lookup by tag
-    intents_data_raw = load_yaml(INTENTS_FILE)
+    intents_data_raw = load_yaml_cached(INTENTS_FILE)
     if intents_data_raw and 'intents' in intents_data_raw:
-        GLOBAL_RESOURCES['intents'] = {item['tag']: item for item in intents_data_raw['intents']}
+        resources_dict['intents'] = {item['tag']: item for item in intents_data_raw['intents']}
     else:
-        GLOBAL_RESOURCES['intents'] = {}
+        resources_dict['intents'] = {}
 
     # Load Bot Profile
-    bot_profile_data = load_yaml(BOT_PROFILE_FILE)
+    bot_profile_data = load_yaml_cached(BOT_PROFILE_FILE)
     if bot_profile_data:
-        GLOBAL_RESOURCES['bot_identity'] = bot_profile_data.get('bot_identity', {})
-        GLOBAL_RESOURCES['response_architecture'] = bot_profile_data.get('response_architecture', {})
-        GLOBAL_RESOURCES['bot_user_notices'] = bot_profile_data.get('user_notices', {}) 
+        resources_dict['bot_identity'] = bot_profile_data.get('bot_identity', {})
+        resources_dict['response_architecture'] = bot_profile_data.get('response_architecture', {})
+        resources_dict['bot_user_notices'] = bot_profile_data.get('user_notices', {}) 
     else:
-        GLOBAL_RESOURCES['bot_identity'] = {}
-        GLOBAL_RESOURCES['response_architecture'] = {}
-        GLOBAL_RESOURCES['bot_user_notices'] = {}
+        resources_dict['bot_identity'] = {}
+        resources_dict['response_architecture'] = {}
+        resources_dict['bot_user_notices'] = {}
 
     # Load Coping Strategies (full detail needed for selection logic)
-    GLOBAL_RESOURCES['coping_strategies_detail'] = load_yaml(COPING_STRATEGIES_FILE)
+    resources_dict['coping_strategies_detail'] = load_yaml_cached(COPING_STRATEGIES_FILE)
     
     # Load Crisis Support
-    crisis_data = load_yaml(CRISIS_SUPPORT_FILE)
+    crisis_data = load_yaml_cached(CRISIS_SUPPORT_FILE)
     if crisis_data:
-        GLOBAL_RESOURCES['crisis_protocols'] = crisis_data.get('response_protocols', {})
-        GLOBAL_RESOURCES['kenya_emergency_services'] = crisis_data.get('kenya_emergency_services', {})
-        GLOBAL_RESOURCES['safety_plan_template'] = crisis_data.get('safety_plan_template', {})
+        resources_dict['crisis_protocols'] = crisis_data.get('response_protocols', {})
+        resources_dict['kenya_emergency_services'] = crisis_data.get('kenya_emergency_services', {})
+        resources_dict['safety_plan_template'] = crisis_data.get('safety_plan_template', {})
     else:
-        GLOBAL_RESOURCES['crisis_protocols'] = {}
-        GLOBAL_RESOURCES['kenya_emergency_services'] = {}
-        GLOBAL_RESOURCES['safety_plan_template'] = {}
+        resources_dict['crisis_protocols'] = {}
+        resources_dict['kenya_emergency_services'] = {}
+        resources_dict['safety_plan_template'] = {}
 
     # Load Empathy and Feelings
-    empathy_data = load_yaml(EMPATHY_AND_FEELINGS_FILE)
+    empathy_data = load_yaml_cached(EMPATHY_AND_FEELINGS_FILE)
     if empathy_data:
-        GLOBAL_RESOURCES['empathy_emotional_states'] = empathy_data.get('emotional_states', {})
-        GLOBAL_RESOURCES['cultural_emotions'] = empathy_data.get('cultural_emotions', {}) 
+        resources_dict['empathy_emotional_states'] = empathy_data.get('emotional_states', {})
+        resources_dict['cultural_emotions'] = empathy_data.get('cultural_emotions', {}) 
     else:
-        GLOBAL_RESOURCES['empathy_emotional_states'] = {}
-        GLOBAL_RESOURCES['cultural_emotions'] = {}
+        resources_dict['empathy_emotional_states'] = {}
+        resources_dict['cultural_emotions'] = {}
 
     # Load Greetings and Emotional Openers
-    greetings_data = load_yaml(GREETINGS_FILE)
+    greetings_data = load_yaml_cached(GREETINGS_FILE)
     all_greetings_patterns = []
     if greetings_data:
         cultural_greetings = greetings_data.get('cultural_greetings', {})
@@ -146,54 +146,55 @@ def load_all_resources():
         all_greetings_patterns.extend(time_sensitive_greetings.get('afternoon', []))
         all_greetings_patterns.extend(time_sensitive_greetings.get('evening', []))
 
-        GLOBAL_RESOURCES['emotional_openers_responses'] = greetings_data.get('emotional_openers', {})
+        resources_dict['emotional_openers_responses'] = greetings_data.get('emotional_openers', {})
     else:
-        GLOBAL_RESOURCES['emotional_openers_responses'] = {}
+        resources_dict['emotional_openers_responses'] = {}
 
-    GLOBAL_RESOURCES['greetings_patterns'] = all_greetings_patterns 
+    resources_dict['greetings_patterns'] = all_greetings_patterns 
     
     # Load Affirmations
-    affirmations_data = load_yaml(AFFIRMATIONS_FILE)
+    affirmations_data = load_yaml_cached(AFFIRMATIONS_FILE)
     if affirmations_data:
-        GLOBAL_RESOURCES['affirmations_core'] = affirmations_data.get('core_affirmations', {}) 
-        GLOBAL_RESOURCES['affirmations_contextual'] = affirmations_data.get('contextual_affirmations', {})
+        resources_dict['affirmations_core'] = affirmations_data.get('core_affirmations', {}) 
+        resources_dict['affirmations_contextual'] = affirmations_data.get('contextual_affirmations', {})
     else:
-        GLOBAL_RESOURCES['affirmations_core'] = {}
-        GLOBAL_RESOURCES['affirmations_contextual'] = {}
+        resources_dict['affirmations_core'] = {}
+        resources_dict['affirmations_contextual'] = {}
 
     # Load General Resources and Crisis info (from resources_and_crisis.yml)
-    resources_data = load_yaml(RESOURCES_AND_CRISIS_FILE)
+    resources_data = load_yaml_cached(RESOURCES_AND_CRISIS_FILE)
     if resources_data:
-        GLOBAL_RESOURCES['therapy_resources'] = resources_data.get('therapy_resources', {})
-        GLOBAL_RESOURCES['self_help_articles'] = resources_data.get('articles', {})
-        GLOBAL_RESOURCES['inclusivity_resources_detail'] = resources_data.get('inclusivity_resources', {}) 
-        GLOBAL_RESOURCES['mythbusters_content'] = resources_data.get('mythbusters', {})
-        GLOBAL_RESOURCES['app_recommendations'] = resources_data.get('app_recommendations', {})
+        resources_dict['therapy_resources'] = resources_data.get('therapy_resources', {})
+        resources_dict['self_help_articles'] = resources_data.get('articles', {})
+        resources_dict['inclusivity_resources_detail'] = resources_data.get('inclusivity_resources', {}) 
+        resources_dict['mythbusters_content'] = resources_data.get('mythbusters', {})
+        resources_dict['app_recommendations'] = resources_data.get('app_recommendations', {})
     else:
-        GLOBAL_RESOURCES['therapy_resources'] = {}
-        GLOBAL_RESOURCES['self_help_articles'] = {}
-        GLOBAL_RESOURCES['inclusivity_resources_detail'] = {}
-        GLOBAL_RESOURCES['mythbusters_content'] = {}
-        GLOBAL_RESOURCES['app_recommendations'] = {}
+        resources_dict['therapy_resources'] = {}
+        resources_dict['self_help_articles'] = {}
+        resources_dict['inclusivity_resources_detail'] = {}
+        resources_dict['mythbusters_content'] = {}
+        resources_dict['app_recommendations'] = {}
 
     # Load User Feedback configuration
-    user_feedback_data = load_yaml(USER_FEEDBACK_FILE)
-    GLOBAL_RESOURCES['user_feedback_config'] = user_feedback_data.get('feedback_channels', {}) if user_feedback_data else {}
+    user_feedback_data = load_yaml_cached(USER_FEEDBACK_FILE)
+    resources_dict['user_feedback_config'] = user_feedback_data.get('feedback_channels', {}) if user_feedback_data else {}
     
     # Load Fallbacks
-    fallbacks_data = load_yaml(FALLBACKS_FILE)
+    fallbacks_data = load_yaml_cached(FALLBACKS_FILE)
     if fallbacks_data:
-        GLOBAL_RESOURCES['fallbacks_default'] = fallbacks_data.get('default_fallbacks', []) 
-        GLOBAL_RESOURCES['fallbacks_escalation'] = fallbacks_data.get('escalation_fallbacks', []) 
+        resources_dict['fallbacks_default'] = fallbacks_data.get('default_fallbacks', []) 
+        resources_dict['fallbacks_escalation'] = fallbacks_data.get('escalation_fallbacks', []) 
     else:
-        GLOBAL_RESOURCES['fallbacks_default'] = []
-        GLOBAL_RESOURCES['fallbacks_escalation'] = []
+        resources_dict['fallbacks_default'] = []
+        resources_dict['fallbacks_escalation'] = []
 
     logger.info("All YAML resources loaded into GLOBAL_RESOURCES.")
-    return GLOBAL_RESOURCES 
+    return resources_dict # Return the local dict for caching
+
 
 @st.cache_resource(show_spinner="Loading AI model...")
-def load_classifier_model():
+def load_classifier_model_cached(): # Renamed to clearly indicate it's the cached version
     """Loads the pre-trained intent classifier model and label encoder."""
     classifier_model = None
     label_encoder = None
@@ -222,7 +223,7 @@ def load_classifier_model():
 # --- Database Functions (for users.db) ---
 
 @st.cache_resource(show_spinner="Initializing user database...")
-def init_user_db():
+def init_user_db_cached(): # Renamed for clarity and caching
     """Initialize database for users, conversations, and messages."""
     with sqlite3.connect(USERS_DB_PATH) as conn: 
         cursor = conn.cursor()
@@ -303,7 +304,7 @@ def init_user_db():
         cursor.execute("SELECT id FROM users WHERE id = ?", (ADMIN_EMAIL,)) 
         if not cursor.fetchone():
             cursor.execute(
-                "INSERT OR IGNORE INTO users (id, username, email, password, is_admin, plan_id, plan_expiration_date) VALUES (?, ?, ?, ?, 1, 3, ?)",
+                "INSERT OR IGNORE INTO users (id, username, email, password, is_admin, plan_id, plan_expiration_date) VALUES (?, ?, ?, ?, 1, 3, ?)", 
                 (ADMIN_EMAIL, "Admin", ADMIN_EMAIL, ADMIN_PASSWORD_HASH, None) 
             )
             logger.info("Default admin user created.")
@@ -505,16 +506,19 @@ def get_random_coping_strategy_detail(strategy_type=None):
         if list_key and isinstance(category_data, dict) and list_key in category_data and isinstance(category_data[list_key], list):
             for item in category_data[list_key]:
                 if isinstance(item, dict):
-                    item['source_type'] = source_label 
-                    all_strategies_flat.append(item)
+                    item_copy = item.copy() # Make a copy to add source_type
+                    item_copy['source_type'] = source_label 
+                    all_strategies_flat.append(item_copy)
         elif isinstance(category_data, list): 
             for item in category_data:
                 if isinstance(item, dict):
-                    item['source_type'] = source_label
-                    all_strategies_flat.append(item)
+                    item_copy = item.copy() # Make a copy
+                    item_copy['source_type'] = source_label
+                    all_strategies_flat.append(item_copy)
         elif isinstance(category_data, dict) and source_label: 
-             category_data['source_type'] = source_label
-             all_strategies_flat.append(category_data)
+             item_copy = category_data.copy() # Make a copy
+             item_copy['source_type'] = source_label
+             all_strategies_flat.append(item_copy)
 
 
     # Core Strategies
@@ -542,8 +546,9 @@ def get_random_coping_strategy_detail(strategy_type=None):
             if isinstance(app_list, list):
                 for app_item in app_list:
                     if isinstance(app_item, dict):
-                        app_item['source_type'] = f'digital_app_{app_type}'
-                        all_strategies_flat.append(app_item)
+                        app_copy = app_item.copy()
+                        app_copy['source_type'] = f'digital_app_{app_type}'
+                        all_strategies_flat.append(app_copy)
     
     # For immediate_support_tips
     if 'immediate_support_tips' in coping_detail and coping_detail['immediate_support_tips'] and 'tips' in coping_detail['immediate_support_tips']:
@@ -558,8 +563,8 @@ def get_random_coping_strategy_detail(strategy_type=None):
     if strategy_type:
         filtered_strategies = [s for s in all_strategies_flat if 
                                 s.get('source_type') == strategy_type or 
-                                (s.get('name') and s.get('name').lower().replace(' ', '_') == strategy_type) or
-                                (s.get('tip') and s.get('tip').lower().replace(' ', '_') == strategy_type) 
+                                (s.get('name') and s.get('name').lower().replace(' ', '_') == strategy_type.lower()) or
+                                (s.get('tip') and s.get('tip').lower().replace(' ', '_') == strategy_type.lower()) 
                                ]
         if filtered_strategies:
             return random.choice(filtered_strategies)
@@ -575,11 +580,10 @@ def get_random_affirmation_detail(affirmation_type=None):
     
     target_list = []
 
-    # Helper to add affirmations, ensuring 'type' is correctly assigned from category tag
     def add_affirmations_from_category(category_dict, source_type):
         if category_dict and source_type in category_dict and 'list' in category_dict[source_type]:
             for item in category_dict[source_type]['list']:
-                item_copy = item.copy() # Avoid modifying original data in cache
+                item_copy = item.copy() # Make a copy
                 item_copy['type'] = source_type
                 target_list.append(item_copy)
 
@@ -652,10 +656,7 @@ def find_response(user_input):
         logger.warning(f"No responses found for HIGH PRIORITY crisis intent: {predicted_intent}")
 
     # --- 3. Contextual Affirmative Response Handling ---
-    # This must come *before* general emotional intent check if we want it to react to "yes"
-    # only in specific contexts where a "yes" is expected.
-    # Added "okay" as a primary check for affirmative response handling.
-    is_affirmative_keyword_present = ("yes" in user_input_lower or "sure" in user_input_lower or "okay" in user_input_lower or "yup" in user_input_lower or "ndiyo" in user_input_lower)
+    is_affirmative_keyword_present = ("yes" in user_input_lower or "sure" in user_input_lower or "okay" in user_input_lower or "yup" in user_input_lower or "ndiyo" in user_input_lower or "na'am" in user_input_lower or "sawa" in user_input_lower)
 
     if (predicted_intent == 'affirmative_response' and confidence > 0.5) or \
        (is_affirmative_keyword_present and st.session_state.get('expected_next_action')): 
@@ -885,8 +886,6 @@ def find_response(user_input):
 
 # --- Streamlit UI ---
 
-st.set_page_config(page_title="Kelly AI Mental Bot", layout="wide", initial_sidebar_state="collapsed") # Added initial_sidebar_state="collapsed"
-
 def show_landing_page():
     """Displays the initial landing page for Kelly AI."""
     st.title("👋 Karibu to Kelly AI - Your Mental Health Companion 🇰🇪")
@@ -931,9 +930,9 @@ def show_chat():
 
     # Accept user input
     if prompt := st.chat_input("What's on your mind?"):
-        if has_exceeded_usage(st.session_state.current_user.get('id', 'anonymous')):
+        if has_exceeded_usage(st.session_state.current_user.get('id', 'anonymous_session_init')): # Use the anonymous ID if not logged in
             st.warning("You've exceeded your conversation limit. Please upgrade your plan or log in.")
-            return # Stop processing if limit exceeded
+            return 
 
         st.session_state.messages.append({"role": "user", "content": prompt})
         log_message(st.session_state.conversation_id, "user", prompt) 
@@ -1444,8 +1443,10 @@ def show_admin():
 
 def main():
     """Main function to run the Streamlit app."""
+    # Set page config here to avoid "already run" errors on rerun
     st.set_page_config(page_title="Kelly AI Mental Bot", layout="wide", initial_sidebar_state="collapsed") 
 
+    # Initialize session state variables once per Streamlit session
     if 'page' not in st.session_state:
         st.session_state.page = "landing" 
     if 'logged_in' not in st.session_state:
