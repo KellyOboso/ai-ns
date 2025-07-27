@@ -18,6 +18,8 @@ import pandas as pd
 load_dotenv() 
 
 # --- NLTK Downloads (for TextBlob in app.py) ---
+# Check if NLTK data is already downloaded before attempting to download
+# This prevents repeated downloads and potential issues
 try:
     nltk.data.find('tokenizers/punkt')
 except nltk.downloader.DownloadError:
@@ -180,8 +182,12 @@ def load_all_resources():
     
     # Load Fallbacks
     fallbacks_data = load_yaml(FALLBACKS_FILE)
-    GLOBAL_RESOURCES['fallbacks_default'] = fallbacks_data.get('default_fallbacks', []) if fallbacks_data else []
-    GLOBAL_RESOURCES['fallbacks_escalation'] = fallbacks_data.get('escalation_fallbacks', []) if fallbacks_data else []
+    if fallbacks_data:
+        GLOBAL_RESOURCES['fallbacks_default'] = fallbacks_data.get('default_fallbacks', []) 
+        GLOBAL_RESOURCES['fallbacks_escalation'] = fallbacks_data.get('escalation_fallbacks', []) 
+    else:
+        GLOBAL_RESOURCES['fallbacks_default'] = []
+        GLOBAL_RESOURCES['fallbacks_escalation'] = []
 
     logger.info("All YAML resources loaded into GLOBAL_RESOURCES.")
     return GLOBAL_RESOURCES 
@@ -220,7 +226,6 @@ def init_user_db():
     """Initialize database for users, conversations, and messages."""
     with sqlite3.connect(USERS_DB_PATH) as conn: 
         cursor = conn.cursor()
-        # Changed users.id to TEXT PRIMARY KEY to allow UUIDs
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
@@ -233,7 +238,6 @@ def init_user_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        # Changed conversations.user_id to TEXT
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS conversations (
                 id TEXT PRIMARY KEY,
@@ -287,7 +291,6 @@ def init_user_db():
             );
         """)
 
-        # Insert default pricing plans if not exist
         cursor.executescript("""
             INSERT OR IGNORE INTO pricing (id, plan_name, max_conversations, price, currency) VALUES 
             (1, 'Free', 5, 0, 'Ksh');
@@ -297,12 +300,11 @@ def init_user_db():
             (3, 'Unlimited', NULL, 2000, 'Ksh');
         """)
         
-        # Create initial admin user if not exists (using ADMIN_EMAIL as ID for consistency and easy lookup)
-        cursor.execute("SELECT id FROM users WHERE id = ?", (ADMIN_EMAIL,)) # Check by id
+        cursor.execute("SELECT id FROM users WHERE id = ?", (ADMIN_EMAIL,)) 
         if not cursor.fetchone():
             cursor.execute(
-                "INSERT OR IGNORE INTO users (id, username, email, password, is_admin, plan_id, plan_expiration_date) VALUES (?, ?, ?, ?, 1, 3, ?)", # Changed to INSERT OR IGNORE
-                (ADMIN_EMAIL, "Admin", ADMIN_EMAIL, ADMIN_PASSWORD_HASH, None) # Admin has unlimited, no expiration
+                "INSERT OR IGNORE INTO users (id, username, email, password, is_admin, plan_id, plan_expiration_date) VALUES (?, ?, ?, ?, 1, 3, ?)",
+                (ADMIN_EMAIL, "Admin", ADMIN_EMAIL, ADMIN_PASSWORD_HASH, None) 
             )
             logger.info("Default admin user created.")
         
@@ -342,7 +344,6 @@ def check_pw(password, hashed):
     return bcrypt.checkpw(password.encode(), hashed.encode())
 
 def register_user(username, email, password, plan_id):
-    # Use email as primary key (TEXT) for non-admin users too, for simplicity and uniqueness
     user_id = email.strip().lower()
     try:
         with sqlite3.connect(USERS_DB_PATH) as conn:
@@ -412,20 +413,18 @@ def has_exceeded_usage(user_id):
         
         if not result:
             logger.warning(f"User {user_id} not found for usage check.")
-            return True # Treat as exceeded if user not found (safety)
+            return True 
 
         max_convos = result[0]
         plan_expiration_date_str = result[1]
 
-        # Check if plan is expired
         if plan_expiration_date_str:
             expiration_date = datetime.fromisoformat(plan_expiration_date_str)
             if datetime.now() > expiration_date:
                 logger.info(f"User {user_id} plan has expired.")
-                # Optionally, downgrade their plan here or in a background task
-                return True # Treat as exceeded if plan expired
+                return True 
 
-        if max_convos is None: # Unlimited plan
+        if max_convos is None: 
             return False
         
         c.execute("SELECT COUNT(*) FROM conversations WHERE user_id = ?", (user_id,))
@@ -473,7 +472,6 @@ def analyze_sentiment(text):
         analysis = TextBlob(text)
         polarity = analysis.sentiment.polarity
         
-        # Define Kenyan specific sentiment indicators
         kenyan_positive_words = {"poa", "safi", "fitii", "mzima", "nzuri", "fresh", "radhi", "fiti", "nzuri", "barikiwa", "shukran", "good", "great", "excellent", "happy", "joy", "positive", "wonderful", "amazing"}
         kenyan_negative_words = {"pole", "sad", "huzuni", "mbaya", "stress", "pressure", "kufa", "shida", "majuto", "not okay", "depressed", "afraid", "low", "worthless", "hopeless", "terrible", "awful", "bad", "maisha ni ngumu", "nimechoka", "broken", "unhappy", "miserable", "pain", "hurt", "grieving", "loss", "dumped", "failed"}
         
@@ -577,26 +575,22 @@ def get_random_affirmation_detail(affirmation_type=None):
     
     target_list = []
 
+    # Helper to add affirmations, ensuring 'type' is correctly assigned from category tag
+    def add_affirmations_from_category(category_dict, source_type):
+        if category_dict and source_type in category_dict and 'list' in category_dict[source_type]:
+            for item in category_dict[source_type]['list']:
+                item_copy = item.copy() # Avoid modifying original data in cache
+                item_copy['type'] = source_type
+                target_list.append(item_copy)
+
     if affirmation_type:
-        if affirmation_type in core_affirmations and 'list' in core_affirmations[affirmation_type]:
-            for item in core_affirmations[affirmation_type]['list']:
-                item['type'] = affirmation_type 
-                target_list.append(item)
-        if affirmation_type in contextual_affirmations and 'list' in contextual_affirmations[affirmation_type]:
-            for item in contextual_affirmations[affirmation_type]['list']:
-                item['type'] = affirmation_type 
-                target_list.append(item)
+        add_affirmations_from_category(core_affirmations, affirmation_type)
+        add_affirmations_from_category(contextual_affirmations, affirmation_type)
     else: 
-        for category_tag, category_data in core_affirmations.items():
-            if 'list' in category_data:
-                for item in category_data['list']:
-                    item['type'] = category_tag 
-                    target_list.append(item)
-        for category_tag, category_data in contextual_affirmations.items():
-            if 'list' in category_data:
-                for item in category_data['list']:
-                    item['type'] = category_tag 
-                    target_list.append(item)
+        for category_tag in core_affirmations.keys():
+            add_affirmations_from_category(core_affirmations, category_tag)
+        for category_tag in contextual_affirmations.keys():
+            add_affirmations_from_category(contextual_affirmations, category_tag)
 
     if target_list:
         return random.choice(target_list)
@@ -661,9 +655,10 @@ def find_response(user_input):
     # This must come *before* general emotional intent check if we want it to react to "yes"
     # only in specific contexts where a "yes" is expected.
     # Added "okay" as a primary check for affirmative response handling.
+    is_affirmative_keyword_present = ("yes" in user_input_lower or "sure" in user_input_lower or "okay" in user_input_lower or "yup" in user_input_lower or "ndiyo" in user_input_lower)
+
     if (predicted_intent == 'affirmative_response' and confidence > 0.5) or \
-       (st.session_state.get('expected_next_action') and 
-        ("yes" in user_input_lower or "sure" in user_input_lower or "okay" in user_input_lower)): # Manual check for affirmative + context
+       (is_affirmative_keyword_present and st.session_state.get('expected_next_action')): 
         
         response_given = False
         
@@ -730,10 +725,9 @@ def find_response(user_input):
              else:
                  logger.warning("No resources found for affirmative_response context.")
         
-        # If a contextual affirmative response was given, clear expected_next_action
         if response_given: 
             st.session_state.expected_next_action = None
-        else: # Otherwise, proceed with generic affirmative if intent was affirmative_response and high confidence
+        else: 
             intent_data = GLOBAL_RESOURCES.get('intents', {}).get(predicted_intent) 
             if intent_data:
                 responses = intent_data.get('responses', [])
@@ -890,6 +884,8 @@ def find_response(user_input):
     return bot_response
 
 # --- Streamlit UI ---
+
+st.set_page_config(page_title="Kelly AI Mental Bot", layout="wide", initial_sidebar_state="collapsed") # Added initial_sidebar_state="collapsed"
 
 def show_landing_page():
     """Displays the initial landing page for Kelly AI."""
@@ -1123,7 +1119,6 @@ def show_history():
     st.markdown("Browse your past conversations with Kelly AI:")
     for conv_id, start_time, end_time in conversations:
         end_time_display = end_time if end_time else "Ongoing"
-        # Removed 'key' from expander for wider Streamlit compatibility
         with st.expander(f"Conversation {conv_id[:8]}... - Started: {start_time} (Ended: {end_time_display})"): 
             st.subheader(f"Conversation ID: `{conv_id}`")
             with sqlite3.connect(USERS_DB_PATH) as conn: 
@@ -1140,7 +1135,6 @@ def show_history():
                 sender_label = "You" if msg_sender == "user" else "Kelly AI"
                 with st.chat_message(msg_sender): 
                     st.markdown(f"**{sender_label} ({msg_timestamp.split('T')[1][:8]})**: {msg_text}")
-                    # Added checks for NoneType before formatting
                     intent_display = msg_intent if msg_intent is not None else "N/A"
                     confidence_display = f"{msg_confidence:.2f}" if msg_confidence is not None else "N/A"
                     sentiment_display = f"{msg_sentiment:.2f}" if msg_sentiment is not None else "N/A"
@@ -1160,7 +1154,6 @@ def show_stories():
         st.error("User ID not found. Please log in again.")
         return
 
-    # Removed 'key' from expander for wider Streamlit compatibility
     with st.expander("Share Your Story", expanded=False): 
         story_title = st.text_input("Title of Your Story", key="story_title_input")
         story_content = st.text_area("Write Your Story Here (max 2000 characters)", key="story_content_input", max_chars=2000)
@@ -1249,7 +1242,7 @@ def show_admin():
                         c = conn.cursor()
                         admin_id = str(uuid.uuid4())
                         c.execute(
-                            "INSERT OR IGNORE INTO users (id, username, email, password, is_admin, plan_id, plan_expiration_date) VALUES (?, ?, ?, ?, 1, 3, ?)", # Changed to INSERT OR IGNORE
+                            "INSERT OR IGNORE INTO users (id, username, email, password, is_admin, plan_id, plan_expiration_date) VALUES (?, ?, ?, ?, 1, 3, ?)", 
                             (admin_id, new_admin_username, new_admin_email, new_admin_password_hash, None) 
                         )
                         conn.commit()
@@ -1390,7 +1383,7 @@ def show_admin():
 
         new_pattern = st.text_area("New User Input Pattern", key="new_pattern_input")
         
-        intent_tags = sorted([tag for tag in GLOBAL_RESOURCES.get('intents', {}).keys()]) # Get tags from the dict
+        intent_tags = sorted([tag for tag in GLOBAL_RESOURCES.get('intents', {}).keys()]) 
         selected_intent_tag = st.selectbox("Assign to Intent Category", ["-- Select Intent --"] + intent_tags, key="new_pattern_intent_select")
         
         new_example_response = st.text_area("Example Bot Response (Optional, for logging)", key="new_response_input")
@@ -1406,7 +1399,6 @@ def show_admin():
                         current_intents_yaml = {'version': 1.0, 'type': 'intent_classification', 'last_updated': datetime.now().isoformat().split('T')[0], 'intents': []}
                     
                     found_intent_obj = None
-                    # Iterate through the list of intent dictionaries to find the one to update
                     for intent_obj in current_intents_yaml.get('intents', []):
                         if intent_obj.get('tag') == selected_intent_tag:
                             found_intent_obj = intent_obj
@@ -1416,14 +1408,11 @@ def show_admin():
                         if 'patterns' not in found_intent_obj:
                             found_intent_obj['patterns'] = []
                         found_intent_obj['patterns'].append(new_pattern)
-                        # Add new_example_response to the responses list if it's new and provided
-                        if new_example_response:
-                            if 'responses' not in found_intent_obj:
-                                found_intent_obj['responses'] = []
-                            if new_example_response not in found_intent_obj['responses']:
-                                found_intent_obj['responses'].append(new_example_response)
+                        if new_example_response and 'responses' not in found_intent_obj:
+                            found_intent_obj['responses'] = [] 
+                        if new_example_response and new_example_response not in found_intent_obj.get('responses', []):
+                             found_intent_obj['responses'].append(new_example_response) 
                     else:
-                        # If intent tag doesn't exist (e.g., if selected_intent_tag came from manual input not dropdown)
                         current_intents_yaml['intents'].append({
                             'tag': selected_intent_tag,
                             'patterns': [new_pattern],
@@ -1432,18 +1421,15 @@ def show_admin():
                             'metadata': {'urgency': selected_urgency} 
                         })
 
-                    # Update last_updated date and increment version
                     current_intents_yaml['last_updated'] = datetime.now().isoformat().split('T')[0]
                     current_intents_yaml['version'] = round(float(current_intents_yaml.get('version', 1.0)) + 0.01, 2) 
 
-                    # Write back to intents.yml
                     with open(INTENTS_FILE, 'w', encoding='utf-8') as f:
                         yaml.dump(current_intents_yaml, f, default_flow_style=False, sort_keys=False)
                     
                     st.success(f"Pattern '{new_pattern}' added to '{selected_intent_tag}' in intents.yml!")
                     st.info("Remember: **Run `python3 train.py` and then restart this Streamlit app** for changes to take effect.")
                     
-                    # Clear input fields and rerun
                     st.session_state.new_pattern_input = ""
                     st.session_state.new_response_input = ""
                     st.session_state.new_pattern_intent_select = "-- Select Intent --" 
@@ -1458,10 +1444,8 @@ def show_admin():
 
 def main():
     """Main function to run the Streamlit app."""
-    # Set page config here to avoid "already run" errors on rerun
-    st.set_page_config(page_title="Kelly AI Mental Bot", layout="wide")
+    st.set_page_config(page_title="Kelly AI Mental Bot", layout="wide", initial_sidebar_state="collapsed") 
 
-    # Initialize session state variables once per Streamlit session
     if 'page' not in st.session_state:
         st.session_state.page = "landing" 
     if 'logged_in' not in st.session_state:
@@ -1484,7 +1468,6 @@ def main():
         st.session_state.initial_greeting_sent = False
 
 
-    # Load all static resources (YAMLs) and ML model once per app run (cached)
     loaded_resources = load_all_resources() 
     global GLOBAL_RESOURCES 
     GLOBAL_RESOURCES = loaded_resources 
@@ -1493,7 +1476,6 @@ def main():
     CLASSIFIER_MODEL, LABEL_ENCODER = load_classifier_model()
     init_user_db() 
 
-    # Start conversation for chat_page if not already started in this session
     if st.session_state.page == "chat_page" and st.session_state.conversation_id is None:
         user_id_for_conv = st.session_state.current_user.get('id') if st.session_state.get('current_user') else None
         st.session_state.conversation_id = start_conversation_in_db(user_id_for_conv) 
@@ -1508,7 +1490,6 @@ def main():
             log_message(st.session_state.conversation_id, "bot", initial_message, "greeting", 1.0, 0.5, "initial_greeting")
             st.session_state.initial_greeting_sent = True 
 
-    # Sidebar navigation
     with st.sidebar:
         st.title("📚 Kelly AI")
         
@@ -1568,7 +1549,6 @@ def main():
                     st.session_state.initial_greeting_sent = False 
                     st.rerun()
     
-    # Page routing logic
     if st.session_state.page == "landing":
         show_landing_page()
     elif st.session_state.page == "chat_page": 
