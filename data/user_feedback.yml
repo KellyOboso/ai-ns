@@ -1,0 +1,286 @@
+# data/user_feedback.yml
+version: 3.2 # Updated version
+type: feedback_analytics
+last_updated: 2025-07-31 # Updated date
+
+# ======================
+# Feedback Collection Methods
+# ======================
+# Defines the various channels and prompts Kelly AI uses to collect user feedback.
+
+feedback_channels:
+  in_chat:
+    description: "Real-time feedback collected during or immediately after a specific interaction."
+    prompts:
+      # General prompt for overall response helpfulness
+      - trigger: "Was this response helpful, or could I have done better?"
+        options:
+          - label: "👍 Ndiyo (Yes), very helpful!"
+            value: 2
+            follow_up: "Asante sana! What was most helpful about it?"
+          - label: "🤔 Kiasi (Somewhat), room for growth."
+            value: 1
+            follow_up: "Thank you for the honesty. How could it be improved, or what was missing?"
+          - label: "👎 La (No), not quite what I needed."
+            value: 0
+            follow_up: "Pole sana. I'm here to learn. What was missing or what did I misunderstand?"
+        type: "binary_or_likert"
+        context: "per_response"
+        cultural_note: "Uses 'Ndiyo' and 'La' for a more local feel."
+
+      # Prompt specifically for resource provision
+      - trigger: "Were the resources I provided relevant and useful for your situation?"
+        options:
+          - label: "✅ Yes, very relevant."
+            value: 1
+          - label: "❌ No, not quite."
+            value: 0
+        type: "binary"
+        context: "resource_provision"
+
+      # Prompt specifically for coping strategies
+      - trigger: "Did that coping strategy resonate with you, 'rafiki' (friend)?"
+        options:
+          - label: "😊 Yes, it helped."
+            value: 1
+          - label: "😐 Not really."
+            value: 0
+        type: "binary"
+        context: "coping_strategy"
+        cultural_note: "Uses 'rafiki' for a warm, informal tone."
+
+  post_conversation:
+    description: "Broader feedback collected after a conversation concludes, or periodically."
+    trigger: "Asante kwa kuzungumza na Kelly. Would you mind rating your overall experience and sharing some thoughts to help me improve?"
+    questions:
+      - id: "q1_understood"
+        question: "Did you feel heard and understood by Kelly?"
+        scale: "1-5 stars" # 1 = Not at all, 5 = Completely
+      - id: "q2_relevant_resources"
+        question: "Were the resources provided (if any) relevant and easy to access?"
+        scale: "1-5 stars"
+      - id: "q3_cultural_sensitivity" # NEW: Explicitly asking about cultural sensitivity
+        question: "Did Kelly's responses feel culturally sensitive and appropriate for a Kenyan context?"
+        scale: "1-5 stars"
+      - id: "q4_recommendation"
+        question: "Would you recommend Kelly to a friend or family member in Kenya?"
+        scale: "1-5 stars"
+      - id: "q5_open_feedback"
+        question: "Do you have any other suggestions or comments for Kelly?"
+        type: "open_text"
+    call_to_action: "Your feedback helps me grow and serve the Kenyan community better."
+
+  external_channels: # NEW: Integrating external feedback sources
+    description: "Channels for collecting feedback outside of the immediate chat interface."
+    channels:
+      - name: "WhatsApp Hotline"
+        contact: "+254700112233"
+        type: "direct_messaging"
+        note: "For direct text feedback or to escalate concerns."
+      - name: "USSD Code"
+        contact: "*483*72#"
+        type: "interactive_menu"
+        note: "For basic ratings and quick suggestions, accessible without internet."
+      - name: "Community Health Volunteer (CHV) Reports"
+        type: "qualitative_reports"
+        note: "CHVs gather feedback from rural communities on Kelly AI's effectiveness and cultural fit."
+      - name: "Online Feedback Form"
+        url: "feedback.kellybot.com" # Example URL
+        type: "web_form"
+        note: "For comprehensive, structured feedback from web users."
+
+# ======================
+# Detailed Analytics Categories
+# ======================
+# Metrics and dimensions for analyzing collected feedback data.
+
+response_analysis:
+  quality_metrics:
+    - name: "Relevance Score"
+      scale: "1-5"
+      description: "How well the AI's response matched the user's explicit or implicit need. Aggregated from 'Was this helpful?' and open text analysis."
+      calculation_method: "Weighted average of in-chat scores & sentiment analysis of open text."
+    
+    - name: "Empathy Score"
+      scale: "1-5"
+      description: "User's perceived emotional understanding and compassion from the AI. Derived from 'Did you feel heard?' and sentiment analysis of responses to empathetic prompts."
+      calculation_method: "Aggregated user ratings and NLP empathy detection."
+
+    - name: "Cultural Sensitivity Score" # NEW: Critical metric for Kenyan context
+      scale: "1-5"
+      description: "How culturally appropriate, respectful, and locally relevant the AI's language and suggestions were. Specifically tracked via Q3 and CHV reports."
+      calculation_method: "Direct user rating (Q3), expert cultural audit, NLP analysis for use of local terms/proverbs."
+  
+  technical_metrics:
+    - name: "Average Response Time"
+      unit: "seconds"
+      description: "Time taken for AI to generate a response after user input."
+    - name: "Average Conversation Duration"
+      unit: "minutes"
+      description: "Total time user spends interacting with the AI."
+    - name: "Average Number of Follow-ups Needed"
+      description: "Count of follow-up questions or clarifications AI needed before resolving a query or providing relevant info."
+    - name: "Intent Classification Accuracy" # NEW
+      description: "Percentage of user inputs where the AI correctly identified the user's primary intent."
+    - name: "Crisis Escalation Rate" # NEW
+      description: "Frequency of triggering critical crisis protocols."
+
+# ======================
+# User Experience (UX) Factors
+# ======================
+# Specific elements of the user experience to monitor and improve based on feedback.
+
+ux_factors:
+  cultural_sensitivity:
+    tracking: true
+    indicators:
+      - "Language preference switches during a session."
+      - "Explicit feedback on cultural reference understanding (e.g., proverbs, local scenarios)."
+      - "User's perceived ease of understanding Kenyan-specific terminology used by AI."
+      - "Feedback from cultural consultants and CHVs."
+  
+  accessibility:
+    tracking: true
+    features_to_monitor:
+      - "Text size adjustment requests: User attempts to change font size/readability."
+      - "Color contrast feedback: User comments on readability due to color schemes."
+      - "Screen reader compatibility: Feedback from users utilizing screen readers."
+      - "USSD usage statistics: Number of users accessing via feature phones."
+    indicators:
+      - "Direct user feedback on accessibility challenges."
+      - "High bounce rates on complex interactions for basic phone users."
+      - "Support requests related to interface navigation."
+
+  trust_and_safety: # NEW: Critical for mental health AI
+    tracking: true
+    indicators:
+      - "User statements of feeling safe and confidential."
+      - "Feedback on transparency of AI limitations."
+      - "Reporting of inappropriate or unhelpful responses."
+      - "Number of users completing safety plans with AI guidance."
+
+# ======================
+# Improvement System (Actionable Insights)
+# ======================
+# How feedback is translated into concrete improvements for Kelly AI.
+
+actionable_insights:
+  response_improvements:
+    description: "Direct improvements to AI's conversational responses."
+    categories:
+      - type: "Resource Suggestions Enhancement"
+        implementation_action: "Add more local Kenyan mental health services and contacts, specify services provided."
+        priority: "high"
+        affected_file: "resources_and_crisis.yml"
+      - type: "Tone Adjustments"
+        implementation_action: "Refine AI's tone, particularly for crisis responses (softer, more directive) and empathetic moments (more validating)."
+        priority: "medium"
+        affected_file: "bot_profile.yml, training_data.yml"
+      - type: "Cultural Phrase Integration"
+        implementation_action: "Increase appropriate use of Swahili, Sheng, and local proverbs, as per cultural audit feedback."
+        priority: "high"
+        affected_file: "bot_profile.yml, training_data.yml"
+      - type: "Clarity and Simplicity"
+        implementation_action: "Simplify complex explanations to a 6th-grade reading level, especially for nuanced concepts."
+        priority: "medium"
+        affected_file: "training_data.yml, content files"
+
+  feature_requests:
+    description: "Tracking and prioritizing user suggestions for new functionalities."
+    tracking_method: "Aggregated from open-text feedback, WhatsApp, and CHV reports."
+    top_requests: # Prioritized list of desired new features
+      - name: "Audio message support"
+        priority: "high"
+        description: "Allowing users to send voice notes and AI to respond via audio."
+      - name: "Therapist matching system"
+        priority: "high"
+        description: "Connecting users with appropriate human therapists based on their needs and location."
+      - name: "Crisis follow-up reminders"
+        priority: "medium"
+        description: "Automated check-ins after a crisis intervention (with user consent)."
+      - name: "Mood journaling integration"
+        priority: "medium"
+        description: "Allowing users to log moods and view trends within the chat."
+      - name: "Guided meditation/breathing audio"
+        priority: "low"
+        description: "AI-guided audio for coping exercises."
+
+# ======================
+# Analytics & Reporting System
+# ======================
+# Defines how feedback data is processed, reported, and used for decision-making.
+
+reporting_system:
+  daily_reports:
+    scope: "Internal team only"
+    includes:
+      - "Top 5 praised responses/interactions of the day."
+      - "All critical feedback items (value 0, explicit negative comments)."
+      - "Overall average response time and conversation count."
+      - "Number of crisis escalations."
+  
+  weekly_insights:
+    scope: "Internal team & cultural consultants"
+    includes:
+      - "Overall user sentiment trends (positive, neutral, negative)."
+      - "Detailed feature request analysis and prioritization updates."
+      - "Comprehensive cultural sensitivity audit findings."
+      - "Effectiveness data on newly implemented features/responses."
+      - "Breakdown of feedback by region/demographic (if data available)."
+
+  monthly_performance_review: # NEW: Broader review
+    scope: "Stakeholders & ethics board"
+    includes:
+      - "Quarterly progress against strategic goals (e.g., rural engagement, stigma reduction)."
+      - "Summary of key improvements implemented."
+      - "Ethical considerations and compliance report."
+      - "Financial viability and resource allocation for feedback initiatives."
+
+alert_system:
+  urgent_alerts:
+    triggers:
+      - "Multiple crisis conversations from same user within 24 hours."
+      - "Consistently low-rated responses (e.g., 3 consecutive 'No' feedback)."
+      - "Explicit user report of system malfunction or harmful behavior by AI."
+      - "Systemic accessibility issues reported by multiple users."
+    notification_channels:
+      - "Email: support@kellybot.com (primary incident response team)"
+      - "SMS alert: +254700123456 (on-call human responder)"
+      - "Slack: #feedback-alerts (internal team communication)"
+      - "Direct Jira/Asana ticket creation for development team."
+
+# ======================
+# Continuous Improvement Loop
+# ======================
+# The process by which feedback drives ongoing development.
+
+feedback_loop:
+  user_involvement:
+    - "Monthly feedback digest email to subscribed users, summarizing improvements based on their input."
+    - "Active beta tester program for new features, recruited from engaged users."
+    - "Online and offline community suggestion boards (e.g., at local health clinics, community centers)."
+    - "Annual user survey to gather deeper insights and demographic data."
+  
+  implementation_timeline:
+    critical_issues: "48-hour resolution target for safety-critical bugs or harmful responses."
+    high_priority_improvements: "Implemented within the next bi-weekly update cycle."
+    general_improvements: "Prioritized on the quarterly roadmap for next development sprint."
+    feature_development: "Longer-term, based on resource availability and strategic alignment."
+
+# ======================
+# Privacy & Ethics in Feedback
+# ======================
+# Explicit statements on how user data from feedback is handled.
+
+data_handling:
+  anonymization: "All feedback, especially open-text and conversation data, undergoes full anonymization to protect user identity before analysis."
+  storage_duration: "Feedback data (anonymized) is retained for analytics and model improvement for 1 year, raw conversation data is deleted after 90 days rolling."
+  user_rights:
+    - "Users have the right to request the deletion of their submitted feedback data."
+    - "Users can opt-out of analytics and feedback prompts at any time via settings."
+    - "All feedback processing adheres strictly to the Kenya Data Protection Act, 2019 and GDPR principles."
+  ethical_use: "Feedback is used solely for improving Kelly AI's effectiveness, safety, and cultural relevance, never for commercial purposes or identification."
+
+metadata:
+  purpose: "Framework for collecting, analyzing, and acting on user feedback to continuously improve Kelly AI."
+  last_reviewed_by: "Kelly AI Team & Ethics Board" # Updated

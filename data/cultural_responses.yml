@@ -1,0 +1,82 @@
+# data/cultural_responses.yml
+version: 1.0
+type: cultural_responses
+last_updated: 2025-07-27
+
+# =========================
+# Cultural Phrases & Responses
+# =========================
+
+responses:
+  - phrase: "mambo vipi"
+    response: "Mambo safi! Niko hapa kukusikiliza. Unajisikiaje leo?" # What's good? I'm here to listen. How are you feeling today?
+    metadata:
+      language: Sheng
+      tone: informal
+
+  - phrase: "niaje"
+    response: "Niaje! Nimefurahi kuongea na wewe. Ninaweza kukusaidiaje?" # What's up! Glad to talk to you. How can I help you?
+    metadata:
+      language: Sheng
+      tone: informal
+
+  - phrase: "habari yako"
+    response: "Nzuri sana, asante! Wewe je, unaendeleaje?" # Very good, thank you! How about you, how are you doing?
+    metadata:
+      language: Swahili
+      tone: formal
+
+  - phrase: "pole sana"
+    response: "Pole sana for what you're going through. I'm here to offer support." # Deep condolences for what you're going through.
+    metadata:
+      language: Swahili/English
+      tone: empathetic
+
+  - phrase: "asante"
+    response: "Karibu sana! I'm glad I could be of help." # You're very welcome!
+    metadata:
+      language: Swahili/English
+      tone: polite
+
+  - phrase: "maisha ni ngumu"
+    response: "Maisha inaweza kuwa ngumu sometimes, but remember you're not alone. Tuko pamoja." # Life can be hard sometimes, but remember you're not alone. We are together.
+    metadata:
+      language: Swahili/English
+      tone: empathetic
+      proverb: "Tuko pamoja"
+
+  - phrase: "nimechoka"
+    response: "Ninasikia umechoka. Sometimes taking a break, even a short one, can help. What's making you feel tired?" # I hear you're tired.
+    metadata:
+      language: Swahili/English
+      tone: empathetic
+
+  - phrase: "shida zangu"
+    response: "Niko hapa kusikiliza shida zako. Unaweza kunieleza zaidi?" # I am here to listen to your problems. Can you tell me more?
+    metadata:
+      language: Swahili/English
+      tone: supportive
+
+  - phrase: "mungu yuko"
+    response: "Faith can be a great source of strength. What does your faith tell you during difficult times?"
+    metadata:
+      language: English
+      tone: spiritual_aware
+
+  - phrase: "harambee"
+    response: "Harambee spirit reminds us of the strength in unity. How can we, together, address what you're facing?"
+    metadata:
+      language: English
+      tone: cultural_aware
+
+  - phrase: "familia yangu"
+    response: "Family can be a source of great support and sometimes challenges. How is your family impacting you right now?"
+    metadata:
+      language: Swahili/English
+      tone: neutral
+
+  - phrase: "ugali"
+    response: "Ah, ugali! A true Kenyan staple. Sometimes, simple comforts can bring a moment of peace. What are you thinking about ugali?"
+    metadata:
+      language: Swahili/English
+      tone: lighthearted

@@ -1,0 +1,39 @@
+# data/fallbacks.yml
+version: 1.0
+type: fallback_responses
+last_updated: 2025-07-31
+
+# ======================
+# Generic Fallback Responses
+# ======================
+# These responses are used when the AI does not confidently classify
+# the user's intent or match any specific keywords.
+
+default_fallbacks:
+  - "💙 I'm here to listen. Please tell me more about what's on your mind."
+  - "💙 How can I support you today, my friend?"
+  - "💙 Niko hapa kwa ajili yako. (I'm here for you.) What would you like to talk about?"
+  - "💙 I'm not quite sure I understood. Could you please rephrase that?"
+  - "💙 Sometimes it's hard to express. Take your time. I'm listening."
+  - "💙 I want to help. Can you give me a little more detail?"
+  - "💙 My purpose is to support you. What's the most important thing you want to share right now?"
+  - "💙 I'm still learning, but I'm here for you. What's on your heart?"
+  - "💙 Pole sana, I'm trying my best to understand. What can I do for you?"
+
+# ======================
+# Escalation Fallbacks (for when default fallbacks are repeatedly used or context is unclear)
+# ======================
+# These are more direct suggestions for human intervention or resources.
+
+escalation_fallbacks:
+  - "It seems I'm having trouble understanding. Would you like me to connect you with a human counselor or provide emergency contacts?"
+  - "If you're feeling overwhelmed and I'm not helping, please consider reaching out to Befrienders Kenya at 0800 723 723."
+  - "Sometimes talking to a human can make a difference. Would you like me to share contacts for professional help?"
+  - "I want to make sure you get the best support. Is there a specific type of help you're looking for that I'm missing?"
+
+# ======================
+# Metadata
+# ======================
+metadata:
+  purpose: "Provides a robust set of fallback responses for the chatbot."
+  notes: "Includes generic and escalation options for improved user experience when primary intents are not matched."

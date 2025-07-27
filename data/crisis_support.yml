@@ -1,0 +1,265 @@
+# data/crisis_support.yml
+version: 3.5 # Updated version
+type: crisis_management
+last_updated: 2025-07-31 # Updated date
+
+# ======================
+# Immediate Crisis Responses
+# ======================
+
+response_protocols:
+  suicide_risk:
+    triggers:
+      - "I want to die"
+      - "Nataka kujiua"  # Swahili
+      - "Life isn't worth living"
+      - "I have a suicide plan"
+      - "Everyone would be better off without me"
+      - "I can't go on"
+      - "I'm done with everything"
+      - "I should just end it"
+      - "Nimechoka na maisha" # Swahili: I'm tired of life
+      - "I'm thinking of ending my life"
+    script:
+      - "I'm deeply concerned about you, and your life matters intensely. Please call Befrienders Kenya at 0800 723 723 right now. They are there to help."
+      - "I hear how much pain you're in. Please don't give up. I'm here with you, and we can get through this moment together. Can you call 0800 723 723?"
+      - "Your safety is my top priority. If you are in immediate danger, please dial 112 or 999 for emergency services in Kenya. Let's talk about how to keep you safe."
+      - "Niko hapa na wewe. Your life is precious. Please reach out to Befrienders Kenya at 0800 723 723. They can offer immediate support."
+    follow_up_questions: # Crucial for immediate assessment and continuation
+      - "Are you currently alone? Is there someone with you or nearby who you can reach out to?"
+      - "Do you have access to anything that could harm you right now?"
+      - "Can you tell me your exact location (county, nearest landmark) so I can try to find closer emergency help if needed?"
+      - "Can you commit to not harming yourself for the next hour, and to call Befrienders Kenya?"
+      - "What's one thing you can focus on right now to help you stay present?"
+    risk_level: critical
+    actions:
+      - "Maintain constant connection with user."
+      - "Encourage immediate contact with helplines."
+      - "Attempt to gather location for emergency services if user is willing."
+      - "Document risk level and escalate to human responder if protocol allows."
+
+  self_harm:
+    triggers:
+      - "I want to cut myself"
+      - "Nataka kujiumiza"  # Swahili
+      - "I'm about to harm myself"
+      - "I need to feel something"
+      - "I'm hurting myself"
+      - "I feel the urge to self-harm"
+      - "I'm struggling with self-injury"
+    responses: # Changed from 'interventions' to 'responses' for consistency with script
+      - "I hear your pain, and I want to help you through this moment safely. Can you try holding an ice cube tightly in your hand, or snapping a rubber band on your wrist instead?"
+      - "Your safety is paramount. If you are bleeding or in immediate physical danger, please call 112 for emergency medical services in Kenya."
+      - "It sounds like you're struggling to cope with overwhelming feelings. Let's find a safer way to manage these emotions together."
+      - "Please don't harm yourself. I'm here to listen. What's making you feel this urge right now?"
+      - "You are strong for reaching out. Let's explore some alternatives to self-harm."
+    follow_up_questions: # Added follow-up questions
+      - "Are there any sharp objects or means of harm near you right now?"
+      - "Is there someone you can call or be with right now who can support you?"
+      - "What usually helps you when you feel the urge to self-harm?"
+      - "Can we try a grounding exercise together to help you through this moment?"
+      - "What emotions are you feeling that are leading to this urge?"
+    risk_level: high
+    actions:
+      - "Provide immediate distraction/alternative coping suggestions."
+      - "Encourage reaching out to trusted person or emergency services."
+      - "Assess immediate physical safety."
+
+  abuse_gbv: # NEW Crisis Protocol: Gender-Based Violence / Abuse
+    triggers:
+      - "I'm being abused"
+      - "My partner hurt me"
+      - "Someone touched me without consent"
+      - "I was assaulted"
+      - "GBV"
+      - "Nimepigwa" # Swahili: I've been beaten
+      - "Nimebakwa" # Swahili: I've been raped
+      - "I'm in a violent relationship"
+    responses:
+      - "This is serious, and I'm so sorry you're going through this. Your safety is paramount. Please contact the Nairobi Women's Hospital GBV Centre at 0800 720 720 or the National GBV Hotline at 1195 immediately."
+      - "I hear you. What you've experienced is not okay. I'm here to help you find immediate support and safety."
+      - "You are brave for sharing this. Let's focus on getting you to a safe place and connecting you with professional help."
+    follow_up_questions:
+      - "Are you in a safe place right now? Can you talk freely?"
+      - "Is the perpetrator still with you or nearby?"
+      - "Do you have a trusted friend, family member, or neighbor you can go to?"
+      - "Would you like me to provide contacts for police or other support organizations?"
+    risk_level: critical
+    actions:
+      - "Prioritize user safety and immediate escape/support."
+      - "Provide direct contact to GBV hotlines and safe houses."
+      - "Encourage reporting to authorities if user is willing and safe."
+
+# ======================
+# Kenyan Crisis Network
+# ======================
+
+kenya_emergency_services:
+  national:
+    - name: "Befrienders Kenya"
+      services: "Suicide prevention, emotional support"
+      contact: "0800 723 723 (24/7)"
+      languages: "English, Swahili"
+      note: "Free, confidential, non-judgmental"
+    
+    - name: "Nairobi Women's Hospital GBV Centre"
+      services: "Gender-based violence support, free forensic exams, counseling"
+      contact: "0800 720 720"
+      languages: "English, Swahili"
+      note: "Comprehensive care for survivors"
+
+    - name: "National GBV Hotline" # Added
+      services: "Gender-based violence reporting and support"
+      contact: "1195 (Toll-Free)"
+      languages: "English, Swahili"
+      note: "Managed by National Council on Administration of Justice"
+
+    - name: "Police Emergency" # Added
+      services: "All emergencies, crime reporting"
+      contact: "999 or 112 (Toll-Free)"
+      languages: "English, Swahili"
+      note: "For immediate danger or crime in progress"
+
+    - name: "Ambulance/Medical Emergency" # Added
+      services: "Medical emergencies, ambulance dispatch"
+      contact: "112 (Toll-Free)"
+      languages: "English, Swahili"
+      note: "Integrated emergency number for all services"
+
+  county_specific:
+    - county: "Mombasa"
+      resource: "Coastal Crisis Centre"
+      services: "Counseling, safe house referrals"
+      contact: "0733 123 456"
+      note: "Local support for coastal region"
+    
+    - county: "Kisumu"
+      resource: "Lake Basin Counseling"
+      services: "Individual and group therapy"
+      contact: "0720 789 012"
+      note: "Focus on Western Kenya"
+    
+    - county: "Nakuru"
+      resource: "Men's Mental Health Hotline"
+      services: "Support for men's mental health issues"
+      contact: "0798 345 678"
+      note: "Dedicated support for men"
+    
+    - county: "Eldoret" # Added another example
+      resource: "Uasin Gishu Mental Health Support"
+      services: "Community mental health outreach"
+      contact: "0710 234 567"
+      note: "Regional support"
+
+# ======================
+# Specialized Support
+# ======================
+
+targeted_resources:
+  students:
+    - name: "Universities' Crisis Line"
+      services: "Counseling, academic stress, peer support"
+      contact: "020 426 8000"
+      hours: "24/7 during semesters"
+      note: "Often university-specific, check with your institution"
+  
+  healthcare_workers:
+    - name: "Medics Mental Health Initiative" # Renamed for clarity
+      services: "Burnout, PTSD, stress management for healthcare professionals"
+      contact: "0790 123 456"
+      whatsapp: "0712 345 678"
+      note: "Confidential support for frontline workers"
+
+  refugees:
+    - name: "Refugee Trauma Initiative"
+      services: "Trauma counseling, psychosocial support, legal aid referrals"
+      contact: "0725 678 901"
+      languages: "Swahili, Somali, French, Arabic" # Added Arabic
+      note: "Support for displaced populations"
+
+  youth: # NEW Category
+    - name: "Shujaa Youth Helpline"
+      services: "Peer counseling, career guidance, drug abuse prevention"
+      contact: "0700 987 654"
+      note: "Youth-focused support"
+
+  parents: # NEW Category
+    - name: "Parenting Support Kenya"
+      services: "Parental stress, child mental health, family counseling"
+      contact: "0711 223 344"
+      note: "Support for parents and caregivers"
+
+# ======================
+# Safety Planning
+# ======================
+
+safety_plan_template:
+  1:
+    step: "Recognize your warning signs and triggers."
+    question: "What are the thoughts, feelings, or situations that make your crises worse?"
+  2:
+    step: "Identify your coping strategies."
+    question: "What are 3 things that usually help you calm down or distract yourself when you're feeling overwhelmed?"
+  3:
+    step: "List your emergency contacts."
+    question: "Who are 5 trusted people (friends, family, professionals) or services you can call when you're in crisis?"
+  4:
+    step: "Find safe environments."
+    question: "Where can you go to feel safe when you're feeling unsafe or overwhelmed?"
+  5:
+    step: "Outline your professional support."
+    question: "What are your counselor's or doctor's contact details, and what's your next appointment?"
+  6: # NEW Step
+    step: "Reasons for living."
+    question: "What are 3 things that are important to you, or reasons to keep going?"
+
+# ======================
+# Follow-Up Protocol (Bot's Internal Actions Post-Crisis Interaction)
+# ======================
+
+post_crisis_actions:
+  immediate:
+    - "Confirm connection to external help (e.g., 'Did you manage to call Befrienders?')."
+    - "Document risk level and specific details of the interaction."
+    - "Alert human responder if high-risk phrases were detected and no immediate connection confirmed."
+    - "Suggest immediate safety measures (e.g., 'Remove dangerous objects')."
+  
+  24_hour_check:
+    - "Send follow-up message: 'Habari yako? Thinking of you. How are you feeling today compared to yesterday?'"  # Swahili: How are you?
+    - "Offer additional resources based on yesterday's conversation (e.g., 'Would you like to explore some coping techniques we discussed?')."
+    - "Assess ongoing safety needs and offer to re-engage crisis protocol if needed."
+    - "Remind user of their safety plan if one was discussed."
+
+# ======================
+# Cultural Considerations
+# ======================
+
+cultural_adaptations:
+  traditional_beliefs:
+    response: "Mental health struggles are real and valid, not just 'uchawi' (witchcraft) or a curse. While spiritual care can offer comfort, professional treatment often provides essential support."
+    approach: "Respectfully combine medical and spiritual perspectives, acknowledging the user's beliefs while guiding towards evidence-based care."
+    common_myths_addressed:
+      - "Mental illness is a punishment from ancestors."
+      - "Only 'mad' people go for therapy."
+  
+  language_options:
+    - "Swahili crisis counselors available"
+    - "Sheng-speaking peer supporters"
+    - "Luo and Kikuyu basic support lines being developed" # Example of future expansion
+
+# ======================
+# Metadata & Configuration
+# ======================
+
+system_config:
+  escalation_protocol: "After 3 high-risk phrases AND no confirmation of external contact → human alert"
+  backup_contacts: "supervisor@kellybot.com, +254700112233"
+  last_drill: "2025-07-30" # Updated drill date
+  human_handoff_threshold: "critical_risk_unresolved"
+
+response_guidelines:
+  - "Never leave suicidal user unattended without attempting connection to external help."
+  - "Always confirm user's immediate safety and location when possible in crisis."
+  - "Document all crisis interactions thoroughly for potential human review."
+  - "Maintain a calm, empathetic, and authoritative tone in crisis."
+  - "Prioritize actionable steps (call, go to safe place) over lengthy discussion in immediate crisis."

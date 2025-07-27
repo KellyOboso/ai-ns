@@ -1,0 +1,273 @@
+# data/resources_and_crisis.yml
+version: 3.1 # Updated version
+type: crisis_resources
+last_updated: 2025-07-31 # Updated date
+
+# ======================
+# Resource Offering Prompts (New Section)
+# ======================
+# These are phrases the bot can use to offer help or resources.
+resource_offering_prompts:
+  general:
+    - "I can share some resources that might be helpful. What kind of support are you looking for?"
+    - "Would you like me to provide some information or contacts related to mental health?"
+    - "There are many tools and services available. What's on your mind?"
+  
+  after_discussion:
+    - "Based on what we've discussed, I have some resources that might assist you. Would you like to hear about them?"
+    - "It sounds like you could benefit from some external support. I can share some options."
+
+# =================
+# Professional Help
+# =================
+
+therapy_resources:
+  description: "Finding professional help is a brave step. Here are some options for therapy and counseling in Kenya and online."
+  kenya:
+    - name: "Chiromo Hospital Group"
+      description: "Offers 24/7 emergency mental health services, inpatient, and outpatient care."
+      contact: "0709 036 000"
+      services: "24/7 emergency mental health, inpatient, outpatient, psychotherapy"
+      note: "One of the leading private psychiatric hospitals in Kenya."
+      follow_up_questions:
+        - "Would you like to know more about what to expect at a hospital setting like Chiromo?"
+        - "Are you looking for emergency care or long-term therapy?"
+    
+    - name: "Amani Counselling Centre"
+      description: "Provides affordable and accessible counseling services across various locations in Kenya."
+      contact: "0721 698 338"
+      services: "Affordable individual, couples, family, and group therapy"
+      note: "Known for its community-based approach and sliding-scale fees."
+      follow_up_questions:
+        - "Amani offers various types of therapy. Are you interested in individual or group sessions?"
+        - "Would you like to know if they have a center near you?"
+    
+    - name: "Kenya Association of Professional Counselors (KAPC)" # Added
+      description: "A professional body that can help you find certified and ethical counselors across Kenya."
+      contact: "0721 698 338 (same as Amani, often affiliated)" # Verify if this is correct or find specific KAPC contact
+      url: "www.kapc.or.ke"
+      services: "Referrals to qualified counselors, professional development"
+      note: "Good starting point to find a therapist in your region."
+      follow_up_questions:
+        - "Are you looking for a specific type of counselor or therapy?"
+        - "What county are you in so I can help narrow down options?"
+
+  online_platforms:
+    - name: "BetterHelp"
+      description: "An international online platform connecting users with licensed therapists for counseling via text, audio, and video."
+      url: "www.betterhelp.com"
+      specialty: "Online counseling for anxiety, depression, relationships, trauma, etc."
+      note: "Offers convenience and flexibility, but may have international pricing."
+      follow_up_questions:
+        - "Are you comfortable with online therapy, or do you prefer in-person sessions?"
+        - "What are your concerns about online platforms?"
+    
+    - name: "TalkSpace"
+      description: "Another popular online therapy platform providing text, audio, and video therapy with licensed professionals."
+      url: "www.talkspace.com"
+      specialty: "Text/video therapy, psychiatry services (in some regions)"
+      note: "Subscription-based model, check for availability in Kenya."
+      follow_up_questions:
+        - "Have you considered text-based therapy? How does that sound to you?"
+        - "What kind of online therapy format would you prefer?"
+    
+    - name: "Afya Mind" # Placeholder/Example for a potential Kenyan online platform
+      description: "A growing Kenyan platform aiming to connect users with local therapists online."
+      url: "www.afyamind.co.ke" # Example URL
+      specialty: "Culturally sensitive online therapy, local therapists"
+      note: "Focuses on Kenyan context and accessibility."
+      follow_up_questions:
+        - "Would you prefer an online platform that focuses specifically on Kenyan therapists?"
+
+# ==============
+# Self-Help Hub
+# ==============
+
+articles:
+  description: "Knowledge is power. Here are some helpful articles and guides to understand mental health topics and practice self-care."
+  prompts:
+    - "I have some articles that might shed light on what you're experiencing. Would you like to explore them?"
+    - "Sometimes learning more about our feelings can help. Here are some resources:"
+  
+  crisis_management:
+    - title: "Creating a Safety Plan"
+      content: "A step-by-step guide to preparing for crisis moments, identifying triggers, coping strategies, and support networks."
+      url: "mentalhealthkenya.org/safety-plan"
+      follow_up_questions:
+        - "Would you like me to walk you through creating a simple safety plan?"
+        - "What's one thing you found useful in this article?"
+    
+    - title: "Supporting Someone in Crisis"
+      content: "How to help a loved one while protecting your own mental health and well-being."
+      url: "mentalhealthkenya.org/support-guide"
+      follow_up_questions:
+        - "Are you looking to support someone else, or yourself?"
+        - "What challenges do you face when trying to help a loved one?"
+
+  mental_health_education:
+    - title: "Understanding Anxiety Attacks"
+      content: "Recognizing symptoms, immediate coping techniques, and when to seek professional help for anxiety attacks."
+      url: "mentalhealthkenya.org/anxiety-attacks" # Example URL
+      follow_up_questions:
+        - "Have you experienced anxiety attacks before? What do they feel like for you?"
+        - "Would you like to try a coping technique for anxiety now?"
+    
+    - title: "Depression Recovery Roadmap"
+      content: "Evidence-based approaches to managing depression, including lifestyle changes, therapy options, and self-care practices."
+      url: "mentalhealthkenya.org/depression-roadmap" # Example URL
+      follow_up_questions:
+        - "What aspect of depression recovery are you most interested in?"
+        - "Have you tried any of these approaches before?"
+    
+    - title: "Coping with Grief: A Kenyan Perspective" # Added
+      content: "Understanding grief processes with cultural considerations, including traditional mourning practices and finding support."
+      url: "mentalhealthkenya.org/grief-kenya" # Example URL
+      follow_up_questions:
+        - "How do cultural traditions impact your experience of grief?"
+        - "Are you looking for ways to cope with loss?"
+
+# =====================
+# Cultural Competency & Inclusivity Resources
+# =====================
+
+inclusivity_resources:
+  description: "We believe mental health support should be accessible and culturally sensitive for everyone. Here are resources for specific communities."
+  prompts:
+    - "Here are some resources tailored for specific communities and cultural contexts. Which area are you interested in?"
+    - "We aim to be inclusive. Are you looking for support that aligns with a specific identity or belief?"
+  
+  lgbtq+:
+    - org: "Galck+"
+      description: "Provides mental health support, safe spaces, and advocacy for LGBTQ+ individuals in Kenya."
+      services: "LGBTQ+ mental health support, safe spaces, advocacy"
+      contact: "0719 632 466"
+      url: "www.galck.org" # Example URL
+      follow_up_questions:
+        - "Are you looking for individual support or community connection?"
+        - "What are your main concerns as an LGBTQ+ individual seeking mental health support?"
+  
+  faith_based:
+    - org: "Christian Counsellors Association of Kenya (CCAK)" # Full name
+      description: "Connects individuals with Christian counselors who integrate faith perspectives with therapeutic practices."
+      contact: "0722 206 688"
+      url: "www.ccak.or.ke" # Example URL
+      services: "Faith-based counseling, spiritual guidance"
+      follow_up_questions:
+        - "How important is faith in your healing journey?"
+        - "Are you looking for a counselor who shares your religious beliefs?"
+    
+    - org: "Islamic Family Counseling" # Placeholder/Example
+      description: "Offers counseling services grounded in Islamic principles for individuals and families."
+      contact: "07XX XXX XXX" # Placeholder contact
+      note: "Seek referrals from local mosques or Islamic centers."
+      follow_up_questions:
+        - "Are you looking for guidance that aligns with Islamic teachings?"
+
+  traditional_healing:
+    description: "We respect traditional practices. While I am an AI, I acknowledge the role of traditional healers in many Kenyan communities. Consider combining traditional approaches with professional mental health care for holistic well-being."
+    prompts:
+      - "If you're exploring traditional healing, here's some information and resources:"
+      - "Many Kenyans combine traditional and modern healing. Here's what I know about traditional resources:"
+    resources:
+      - name: "Association of Traditional Healers of Kenya"
+        description: "A body representing traditional healers, potentially offering referrals or information."
+        contact: "0720 415 321"
+        note: "Always verify credentials and practices."
+      - name: "Local Community Elders"
+        description: "Often a source of wisdom, spiritual guidance, and traditional dispute resolution within communities."
+        note: "Approach respected elders in your local area."
+    follow_up_questions:
+      - "What kind of traditional healing are you interested in?"
+      - "How do you feel about combining traditional practices with modern therapy?"
+      - "Have you had positive experiences with traditional healers before?"
+
+# ====================
+# Myth vs Fact System
+# ====================
+
+mythbusters:
+  description: "Mental health myths are common. Let's separate fact from fiction to help you understand better."
+  prompts:
+    - "Let's bust some common mental health myths. What myth have you heard that you'd like to clarify?"
+    - "Here are some common myths and facts about mental health in Kenya:"
+  
+  myths: # Renamed from direct list to 'myths' for clarity
+    - myth: "Mental illness is a spiritual problem or 'uchawi' (witchcraft)."
+      fact: "While spiritual care can offer comfort, mental health conditions are often complex medical conditions that require professional treatment, just like physical illnesses."
+      evidence: "The World Health Organization (WHO) reports that 1 in 4 Kenyans will experience a mental health condition in their lifetime, highlighting it as a public health issue."
+      follow_up_questions:
+        - "Does this fact change your perspective on mental illness?"
+        - "What other myths about mental health have you heard?"
+
+    - myth: "Medication changes your personality or makes you a 'zombie'."
+      fact: "Properly prescribed medication helps regulate brain chemistry and can alleviate symptoms without changing who you are. It helps you feel more like yourself again."
+      follow_up_questions:
+        - "What are your concerns about mental health medication?"
+        - "Have you or someone you know had experiences with medication?"
+
+    - myth: "Therapy is only for 'mad' people or wazungu (Westerners)." # Added
+      fact: "Therapy is for anyone seeking to understand themselves better, cope with life's challenges, or improve their well-being. Many Kenyans are finding immense benefit from culturally sensitive therapy."
+      follow_up_questions:
+        - "What are your thoughts on therapy?"
+        - "Do you feel there's a stigma around seeking mental health help in your community?"
+
+    - myth: "You can just 'snap out of' depression or anxiety." # Added
+      fact: "Mental health conditions are not a choice or a sign of weakness. They are real illnesses that require understanding, support, and often professional intervention, just like a broken leg needs a cast."
+      follow_up_questions:
+        - "Have you ever been told to 'just get over it'?"
+        - "How does it feel when people say that?"
+
+# ====================
+# Mobile Resources
+# ====================
+
+app_recommendations:
+  description: "Mobile apps can be convenient tools for self-care, mood tracking, and accessing mental health resources on the go."
+  prompts:
+    - "Would you like some recommendations for mental health apps?"
+    - "Here are some apps that can support your mental well-being:"
+  
+  crisis_support:
+    - name: "Nivishe"
+      description: "A Kenyan mental health app providing local resources, daily affirmations, and self-help tools tailored for the Kenyan context."
+      features: "Kenyan mental health resources, daily prompts, mood tracking, affirmations."
+      os: "Android/iOS"
+      how_to_use_with_bot: "Nivishe can complement our conversations by providing daily reminders and exercises. I can tell you more about specific features."
+      follow_up_questions:
+        - "Have you tried Nivishe or any other local mental health apps?"
+        - "What features are you looking for in a mental health app?"
+    
+    - name: "My Possible Self"
+      description: "An international app designed to help users track their mood, identify triggers, and learn coping skills through CBT-based exercises."
+      features: "Anxiety/depression tracker, CBT exercises, guided self-help plans."
+      os: "Android/iOS"
+      how_to_use_with_bot: "My Possible Self offers structured programs. We can discuss how CBT works if you're interested."
+      follow_up_questions:
+        - "Are you comfortable using international apps, or do you prefer local ones?"
+        - "Are you interested in tracking your mood or learning specific exercises?"
+
+  general_wellbeing: # NEW Category for non-crisis apps
+    - name: "Calm"
+      description: "A popular app for meditation, sleep, and mindfulness, offering guided meditations, sleep stories, and breathing exercises."
+      features: "Meditation, sleep stories, mindfulness exercises."
+      os: "Android/iOS"
+      note: "Subscription required for full features."
+      follow_up_questions:
+        - "Are you interested in meditation or improving your sleep?"
+    
+    - name: "Headspace"
+      description: "Offers guided meditations and mindfulness training to help users manage stress, anxiety, and improve focus."
+      features: "Guided meditations, mindfulness courses, sleep sounds."
+      os: "Android/iOS"
+      note: "Subscription required for full features."
+      follow_up_questions:
+        - "Have you tried mindfulness before?"
+
+# ====================
+# Metadata & Configuration
+# ====================
+
+metadata:
+  cultural_relevance: high
+  accessibility_focus: high
+  last_reviewed: "2025-07-31 by Kelly AI Team" # Updated review date

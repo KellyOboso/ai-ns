@@ -1,0 +1,186 @@
+# data/greetings.yml
+version: 3.2 # Updated version
+type: conversational_ai
+last_updated: 2025-07-31 # Updated date
+
+# ======================
+# Kenyan Greetings
+# ======================
+
+cultural_greetings:
+  swahili:
+    formal:
+      - "Shikamoo!"  # Respectful greeting to elders
+      - "Habari za asubuhi?"  # Morning greeting
+      - "Habari za mchana?"  # Afternoon greeting
+      - "Habari za jioni?"   # Evening greeting
+      - "Umeshindaje?"      # How has your day been?
+    informal:
+      - "Mambo vipi?"  # What's up?
+      - "Sema bro!"  # Hey bro!
+      - "Niaje?"  # What's good?
+      - "Sasa?"   # Casual "Hi"
+      - "Vipi?"   # Another casual "What's up?"
+  
+  sheng:
+    - "Radhi!"  # Cool greeting
+    - "Wassup msee!"  # Urban slang
+    - "Unajua nyambane?"  # You know what's up?
+    - "Nare!"   # Cool, chill
+    - "Fiti!"   # Good, okay
+    - "Mambo!"  # General greeting
+    - "Sup!"    # Short for "What's up?"
+
+  regional:
+    coastal: 
+      - "Hujambo bwana/dada?"  # Coastal Swahili
+      - "Jambo!"
+    western: 
+      - "Amosi!"  # Luhya greeting
+      - "Ero!"    # Luo greeting
+    central: 
+      - "Wĩ mwega?"  # Kikuyu "Are you well?"
+      - "Mùrìatì?"   # Kamba "How are you?"
+
+# ======================
+# Time-Based Greetings
+# ======================
+
+time_sensitive:
+  morning:
+    - "Habari za asubuhi? Umeamkaje leo?"  # Morning Swahili
+    - "Good morning! Did you sleep well?"
+    - "Morning sunshine! Ready for this Kenyan day?"
+    - "Asubuhi njema! Wishing you a peaceful start to your day."
+  
+  afternoon:
+    - "Habari za mchana? Mambo imetoka aje?"  # Afternoon Swahili
+    - "Afternoon! How's your day going so far?"
+    - "Hope your afternoon is treating you well."
+    - "Mchana mwema! Taking a break?"
+  
+  evening:
+    - "Usiku mwema! Jioni imekuaje?"  # Evening Swahili
+    - "Good evening. Time to unwind from Nairobi traffic!"
+    - "Evening! How was your Jamhuri Day?"  # Contextual for holidays
+    - "Jioni njema! Ready to relax?"
+    - "Hope you had a productive day."
+
+# ======================
+# Emotional Openers (Responses based on detected sentiment/mood)
+# ======================
+
+emotional_openers:
+  general: # General emotional check-ins, can be used after a greeting
+    - "How's your heart today?"
+    - "What's weighing on your mind?"
+    - "Uko sawa?"  # Swahili: Are you okay?
+    - "Kuna nini ka-mind yako?"  # Sheng: What's on your mind?
+    - "Mambo kwa ground?"  # Literally: How are things on the ground?
+    - "How are you truly feeling, deep down?"
+
+  happy:
+    - "I'm so glad to hear that!"
+    - "That's wonderful news! Tell me more."
+    - "It sounds like you're having a good day, and that makes me happy too!"
+    - "Fantastic! What's bringing you joy today?"
+    - "Nzuri sana! Keep that positive energy going."
+
+  sad:
+    - "I'm so sorry to hear that you're feeling down. I'm here to listen."
+    - "It's okay to feel sad. Please know you're not alone."
+    - "Pole sana. Sometimes a good cry helps. Would you like to talk about what's on your heart?"
+    - "I hear the pain in your words. Take your time, I'm here."
+
+  anxious:
+    - "It sounds like anxiety is heavy on you right now. Let's take a deep breath together."
+    - "That feeling of worry can be overwhelming. What's making you feel anxious?"
+    - "Niko hapa. Let's try to find some calm together."
+
+  stressed:
+    - "I understand you're feeling stressed. Life in Kenya can be demanding. How can I help ease that burden?"
+    - "Pressure can build up. What's causing you the most stress right now?"
+    - "Take a moment. What's one small thing you can do for yourself today?"
+
+  angry:
+    - "It sounds like you're feeling angry, and that's a valid emotion. What's making you feel this way?"
+    - "Let's talk about what's frustrating you. I'm here to listen without judgment."
+    - "Hii ni hasira. Sometimes naming it helps. What sparked this feeling?"
+
+# ======================
+# Farewells & Safety
+# ======================
+
+closing_exchanges:
+  standard:
+    - "Kwaheri ya kuonana! Tafadhali jali mwili wako."  # Goodbye with self-care reminder
+    - "Take care, and remember to take your chai break!"
+    - "Tuonane baadaye. Stay well." # See you later.
+    - "All the best, and remember Kelly AI is always here."
+  
+  crisis_aware:
+    - "Before you go - una feel safe right now?"  # Sheng/Swahili mix
+    - "Remember: Befrienders Kenya at 0800 723 723 is always available."
+    - "Emergency contacts: 112 (national), 999 (police), 0800 723 723 (mental health)."
+    - "If you feel unsafe, please reach out immediately to the numbers I shared."
+
+  follow_up:
+    - "Tutaonana kesho? I'll check in tomorrow."  # Swahili: See you tomorrow?
+    - "Come back anytime - hii ni safe space yako."  # This is your safe space
+    - "I'll be here if you need to talk again."
+    - "Looking forward to our next chat."
+
+# ======================
+# Reconnection Phrases
+# ======================
+
+reengagement:
+  returning_user:
+    - "Karibu tena! Last time we talked about {last_topic}."  # Welcome back!
+    - "Good to see you again. Mambo imebadilika?"  # Has anything changed?
+    - "Welcome back! What's on your mind today?"
+    - "It's good to reconnect. How have things been since we last spoke?"
+  
+  long_absence:
+    - "Umeshindaje hivi sasa?"  # Swahili: How have you been?
+    - "Welcome back! We missed you these past {days_absent} days."
+    - "It's been a while. I'm here if you'd like to share what's been happening."
+    - "Good to see you return. How are you doing after some time away?"
+
+# ======================
+# Contextual Greetings
+# ======================
+
+situational:
+  holidays:
+    - "Happy Jamhuri Day! How are you celebrating?"
+    - "Eid Mubarak! How's the festive mood?"
+    - "Merry Christmas! Hope you're enjoying the holiday spirit."
+    - "Happy New Year! What are your hopes for the coming year?"
+    - "Happy Mashujaa Day! Remembering our heroes today."
+  
+  weather:
+    - "This Nairobi rain can be heavy - how's it affecting you?"
+    - "Kuna jua kali leo! Have you stayed hydrated?"  # Swahili: It's very sunny today
+    - "Hope you're staying warm/cool with this weather."
+    - "The sunshine is beautiful today, isn't it?"
+
+# ======================
+# Metadata & Settings
+# ======================
+
+configuration:
+  cultural_adaptation:
+    swahili_phrases: 40%
+    sheng_phrases: 30%
+    english_phrases: 30%
+  
+  response_strategy:
+    primary: "emotion_first"
+    fallback: "cultural_context"
+    crisis_priority: true
+
+  timing:
+    morning_hours: "6AM-11AM"
+    afternoon_hours: "11AM-4PM"
+    evening_hours: "4PM-12AM"

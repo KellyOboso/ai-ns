@@ -1,0 +1,383 @@
+# data/coping_strategies.yml
+version: 3.7 # Updated version
+type: coping_resources
+last_updated: 2025-07-31 # Updated date
+
+# ======================
+# Foundational Techniques
+# ======================
+
+core_strategies:
+  breathing:
+    description: "Breathing exercises are powerful tools to calm your nervous system, reduce anxiety, and bring you back to the present moment. They are quick and can be done anywhere."
+    techniques:
+      - name: "4-7-8 Breathing"
+        how_to_guide:
+          - "Sit or lie comfortably. Place the tip of your tongue against the ridge of tissue just behind your upper front teeth, and keep it there through the entire breathing process."
+          - "Exhale completely through your mouth, making a 'whoosh' sound."
+          - "Close your mouth and inhale quietly through your nose to a mental count of 4."
+          - "Hold your breath for a count of 7."
+          - "Exhale completely through your mouth, making a 'whoosh' sound to a count of 8."
+          - "This is one breath. Inhale again and repeat for a total of four breaths."
+        swahili_tip: "Fanya mara 4 za mfululizo (Do 4 consecutive cycles)."
+        benefits: "Promotes relaxation, reduces stress, helps with sleep."
+        follow_up_questions:
+          - "Did you try the 4-7-8 breathing? How do you feel after a few cycles?"
+          - "Did you find it easy to follow, or was any part challenging?"
+          - "Would you like to try another round, or move on to something else?"
+      
+      - name: "Box Breathing"
+        how_to_guide:
+          - "Sit comfortably with your feet flat on the floor."
+          - "Exhale slowly to a count of 4, emptying your lungs."
+          - "Hold your breath for a count of 4."
+          - "Inhale slowly through your nose to a count of 4."
+          - "Hold your breath again for a count of 4."
+          - "Repeat this cycle for 3-5 minutes, imagining drawing a box with your breath."
+        visual: "Imagine drawing a box with your breath – inhale up one side, hold across the top, exhale down the other, hold across the bottom."
+        duration: "Aim for 3-5 minutes."
+        benefits: "Helps calm the mind, improves focus, reduces physiological stress responses."
+        follow_up_questions:
+          - "How did the box breathing feel for you?"
+          - "Did the visualization help you focus?"
+          - "Is this a technique you think you could use regularly?"
+
+  grounding:
+    description: "Grounding techniques help you reconnect with the present moment when you feel overwhelmed, anxious, or disconnected. They shift your focus from distressing thoughts to your immediate surroundings."
+    techniques:
+      - name: "5-4-3-2-1 Technique"
+        how_to_guide:
+          - "Look around and identify 5 things you can SEE."
+          - "Notice 4 things you can TOUCH and feel their texture."
+          - "Listen for 3 sounds you can HEAR."
+          - "Identify 2 things you can SMELL."
+          - "Finally, notice 1 thing you can TASTE (even if it's just the taste in your mouth)."
+        kenyan_examples:
+          - "Identify 5 matatu colors, 4 textures on your clothes, 3 sounds of hawkers, 2 smells from a nearby kitchen, 1 taste of your chai."
+          - "Notice 5 patterns on a kanga, 4 textures of the soil, 3 sounds of children playing, 2 smells of cooking ugali, 1 taste of mandazi."
+        benefits: "Quickly brings you back to the present, reduces dissociation, and calms panic."
+        follow_up_questions:
+          - "Did you try the 5-4-3-2-1 technique? What did you notice?"
+          - "Did it help you feel more present or calm?"
+          - "What was the easiest/hardest part for you?"
+          - "Can you identify one thing you saw/heard/felt that stood out?"
+
+# ======================
+# Kenyan Context Strategies
+# ======================
+
+cultural_strategies:
+  communal:
+    description: "In Kenya, community is a strong pillar of support. Engaging with your community can provide comfort, connection, and a sense of belonging."
+    methods:
+      - name: "Visit your local mama mboga stall for chat"
+        how_to: "Engage in friendly conversation with your local grocery vendor. Share a laugh, discuss daily life. It's a simple way to feel connected."
+        benefits: "Social connection, reduces feelings of isolation, fosters community bonds."
+      - name: "Join a chama group meeting"
+        how_to: "Chamas (savings groups) are common. Participating offers financial support and a strong social network. Look for one in your area or ask trusted friends."
+        benefits: "Mutual support, financial stability, strong social ties, shared experiences."
+      - name: "Attend community harambee"
+        how_to: "Harambees are communal fundraising events. Participating, even in a small way, connects you to a collective effort and spirit of unity."
+        benefits: "Sense of purpose, community bonding, collective healing."
+    follow_up_questions:
+      - "Which of these communal activities resonates most with you?"
+      - "Do you have a mama mboga or a chama you feel comfortable engaging with?"
+      - "How important is community support to you right now?"
+  
+  spiritual:
+    description: "For many Kenyans, spirituality and faith are central to well-being. Engaging in spiritual practices can provide peace, guidance, and hope."
+    methods:
+      - name: "Meditate with rosary beads or prayer beads"
+        how_to: "Focus on the beads as you pray or meditate, allowing the repetitive motion to calm your mind and deepen your spiritual connection."
+        benefits: "Promotes mindfulness, spiritual connection, reduces anxiety through repetitive action."
+      - name: "Read scripture at open-air market or quiet place"
+        how_to: "Find a quiet spot, even amidst daily life, and read passages that bring you comfort or inspiration. Reflect on their meaning for you."
+        benefits: "Spiritual guidance, sense of peace, reflection."
+      - name: "Traditional storytelling with elders"
+        how_to: "Seek out opportunities to listen to elders share traditional stories. These narratives often contain wisdom and coping lessons passed down through generations."
+        benefits: "Cultural connection, intergenerational wisdom, perspective, sense of belonging."
+    follow_up_questions:
+      - "How important is your spiritual or faith practice to your well-being?"
+      - "Which of these spiritual methods feels most comforting to you?"
+      - "Is there a particular scripture or story that brings you peace?"
+
+  # --- MERGED FROM coping_mechanisms.yml ---
+  urban_kenya_specific:
+    description: "Coping strategies tailored for the unique challenges and opportunities of urban life in Kenya."
+    methods:
+      - name: "Listen to soothing benga or genge music"
+        how_to: "Create a playlist of your favorite calm Kenyan music. Let the rhythm and familiar sounds soothe your mind during commutes or breaks."
+        benefits: "Emotional regulation, cultural connection, stress reduction."
+      - name: "Count colorful matatu designs on your commute"
+        how_to: "Turn your commute into a mindful exercise. Focus on the vibrant art and unique designs on matatus. Count them, notice details, and appreciate the creativity."
+        benefits: "Grounding, distraction from stress, appreciation of local culture."
+    follow_up_questions:
+      - "Which urban strategy do you think you could try today?"
+      - "What's your favorite type of Kenyan music for relaxation?"
+      - "How do you usually manage stress during your commute?"
+
+  rural_kenya_specific:
+    description: "Coping strategies drawing on the rhythms and practices of rural Kenyan life."
+    methods:
+      - name: "Fetch Water Mindfully"
+        how_to: "Turn the chore of fetching water into a meditation. Focus on the rhythm of your steps, the feel of the jerrycan, the sound of the water, and your breath. Be present in the moment."
+        benefits: "Mindfulness, physical activity, connection to daily life, sense of accomplishment."
+      - name: "Participate in communal farming activities"
+        how_to: "Join neighbors or family in communal farming. The shared effort, connection to the land, and physical activity can be very grounding and supportive."
+        benefits: "Community bonding, physical activity, sense of purpose, stress relief."
+      - name: "Evening storytelling with elders"
+        how_to: "Seek out opportunities to listen to elders share traditional stories in the evening. This fosters cultural connection, provides wisdom, and offers a calming end to the day."
+        benefits: "Intergenerational connection, cultural preservation, emotional comfort, perspective."
+    follow_up_questions:
+      - "How does connecting with nature or traditional practices help you cope?"
+      - "Is there a specific chore you could try doing more mindfully?"
+      - "What's a favorite traditional story you've heard?"
+
+# ======================
+# Situation-Specific Coping
+# ======================
+
+by_scenario:
+  matatu_stress:  # Public transport stress
+    name: "Coping with Matatu Stress"
+    description: "Matatu rides can be chaotic, but there are ways to manage the stress and overwhelm."
+    strategies:
+      - tip: "Listen to soothing benga or genge music"
+        how_to: "Create a playlist of your favorite calm Kenyan music to listen to during your commute. Let the rhythm distract and soothe you."
+      - tip: "Count colorful bus decorations"
+        how_to: "Engage in a simple grounding exercise by focusing on the vibrant art and unique designs on matatus around you. Count them, notice details."
+      - tip: "Practice patience mantras"
+        how_to: "Silently repeat phrases like 'Haraka haraka haina baraka' (Hurry hurry has no blessings) or 'Niko salama' (I am safe) to cultivate patience."
+    follow_up_questions:
+      - "Which of these matatu coping strategies sounds most feasible for your next ride?"
+      - "What's your go-to music when you need to relax?"
+      - "Can you identify one positive thing about your commute, even a small one?"
+
+  power_outage:
+    name: "Coping During Power Outages (Stima Imeenda)"
+    description: "Power outages are common in Kenya. Instead of frustration, use this time for unique coping and connection."
+    strategies:
+      - tip: "Light mkorogo candles mindfully"
+        how_to: "If you have local candles, light them and focus on the flickering flame. Use it as a point of mindfulness meditation."
+      - tip: "Tell stories with family or housemates"
+        how_to: "Gather together and share traditional stories, personal anecdotes, or even create new ones. It fosters connection and distraction."
+      - tip: "Stargaze outside"
+        how_to: "Step outside away from city lights if possible. Look up at the vast Kenyan sky and appreciate the stars. It can put things into perspective."
+    follow_up_questions:
+      - "How do you usually feel when the power goes out?"
+      - "Which of these ideas could you try next time the 'stima imeenda'?"
+      - "Do you have any favorite stories to share with your family?"
+
+  # --- MERGED FROM coping_mechanisms.yml ---
+  post_breakup:
+    name: "Coping After a Breakup (Baada ya Kuachana)"
+    description: "Heartbreak is a painful experience. It's important to allow yourself to grieve and find healthy ways to move forward."
+    strategies:
+      - tip: "Allow yourself to grieve - huzuni ni halali"
+        how_to: "It's okay to feel sad, angry, or confused. Don't suppress your emotions. Let yourself cry, talk about it, or write in a journal."
+      - tip: "Connect with wazazi or close ndugu"
+        how_to: "Lean on your parents or trusted close relatives/friends. Their support and wisdom can be a great comfort during this time."
+      - tip: "Visit uplifting places like Nairobi Arboretum or local parks"
+        how_to: "Spend time in nature. The peace and beauty can be very healing. Take a mindful walk, or simply sit and observe."
+      - tip: "Reflect on the proverb: 'Maji ukinyea, chungu yake'"
+        how_to: "This Swahili proverb means 'If you urinate in water, its bitterness is yours.' It can be interpreted as owning your actions and consequences, or that some things are best left alone. Reflect on how it applies to letting go."
+    kenyan_proverb: "Maji ukinyea, chungu yake" # Added for direct reference
+    follow_up_questions:
+      - "What emotions are you feeling most strongly right now about the breakup?"
+      - "Who is one person you feel comfortable talking to about this?"
+      - "Would you like to explore other ways to process your grief?"
+
+  before_exams:
+    name: "Coping Before Exams (Kabla ya Mtihani)"
+    description: "Exam periods can be highly stressful. These strategies can help manage anxiety and improve focus."
+    strategies:
+      - tip: "Study in a group with classmates (mwanafunzi mwenzako)"
+        how_to: "Collaborate with peers. Explaining concepts to each other can solidify your understanding and reduce feelings of isolation. Choose a supportive group."
+      - tip: "Practice with past papers at Kenya National Library or online"
+        how_to: "Familiarize yourself with the exam format and types of questions. This builds confidence and identifies areas for improvement."
+      - tip: "Use the 50-10 study rule (50 mins study, 10 mins chai break)"
+        how_to: "Break down your study time into manageable chunks. The short breaks prevent burnout and improve retention. Use your chai break mindfully!"
+      - tip: "Affirmation: 'My KCSE results don't define my future; my effort and spirit do.'" # Added relevant affirmation
+        how_to: "Repeat this affirmation to yourself when you feel overwhelmed by exam pressure. Focus on your effort and resilience."
+    follow_up_questions:
+      - "What's your biggest worry about the upcoming exams?"
+      - "Which study strategy do you think would help you most?"
+      - "How do you usually relax after a long study session?"
+
+# ======================
+# Physical Coping Methods (Consolidated)
+# ======================
+
+movement_based:
+  - name: "Market Walk Therapy"
+    description: "Walking through your local market (soko) can be a stimulating and grounding experience, engaging all your senses while providing gentle exercise."
+    how_to_guide:
+      - "Walk at a comfortable pace, noticing the vibrant colors of fresh produce."
+      - "Listen to the sounds of vendors, customers, and daily life."
+      - "Smell the spices, fruits, and fresh air."
+      - "Feel the ground beneath your feet, the breeze on your skin."
+      - "Engage in light conversation with a mama mboga or vendor."
+    benefits: "Combines physical activity with mindfulness, social connection, and sensory grounding."
+    follow_up_questions:
+      - "When was the last time you took a mindful walk?"
+      - "What are some of your favorite sights or sounds at the market?"
+      - "Could you try this for 10-15 minutes today?"
+  
+  - name: "Chores as Meditation"
+    description: "Transforming daily chores into mindful practices can help you stay present and reduce stress, even during routine tasks like fetching water or washing dishes."
+    how_to_guide:
+      - "For fetching water: Focus on the rhythm of your steps, the feel of the jerrycan, the sound of the water, and your breath."
+      - "For washing dishes: Pay attention to the warmth of the water, the feel of the soap, the sound of scrubbing, and the cleanliness of each item."
+      - "For sweeping the compound: Notice the sweeping motion, the dust, the sounds, and the satisfaction of a clean space."
+    tips: "Focus on water sounds and body movements; engage all senses in the task." # Kept for backward compatibility if needed
+    benefits: "Turns mundane tasks into opportunities for mindfulness, reduces rumination, provides a sense of accomplishment."
+    follow_up_questions:
+      - "What's a chore you do regularly that you could try doing mindfully?"
+      - "How do you think focusing on the task itself might change how you feel about it?"
+      - "Would you like to try this for 5 minutes today?"
+
+# ======================
+# Creative Outlets (Consolidated)
+# ======================
+
+creative_outlets:
+  - name: "Journaling (Kuandika kwa Diary Yako)"
+    description: "Writing down your thoughts and feelings can be a powerful way to process emotions, gain clarity, and reduce stress."
+    how_to: "Find a quiet space and a notebook or diary. Write freely about whatever is on your mind – your worries, joys, frustrations, or dreams. Don't worry about grammar or spelling, just let it flow."
+    benefits: "Emotional release, self-reflection, problem-solving, stress reduction."
+    follow_up_questions:
+      - "Do you have a diary or a notebook you could use for journaling?"
+      - "What's one thing you might want to write about today?"
+      - "How do you feel about expressing your thoughts on paper?"
+
+  - name: "Drawing with Coffee Stains or Local Materials"
+    description: "Art doesn't require fancy supplies. Using everyday materials like coffee, soil, or charcoal can be a unique and accessible way to express yourself."
+    how_to: "Brew some strong coffee, let it cool, and use it like paint on paper. Experiment with different shades. You can also try drawing with charcoal from your jiko (cookstove) or colored soil."
+    benefits: "Creative expression, stress relief, mindfulness, connection to local resources."
+    follow_up_questions:
+      - "Does the idea of creating art with everyday materials appeal to you?"
+      - "What emotions might you want to express through drawing today?"
+      - "Do you have any coffee or other natural materials you could use?"
+
+  - name: "Composing Mugithi Lyrics or Local Songs"
+    description: "Music is deeply ingrained in Kenyan culture. Expressing yourself through song, even if just for yourself, can be incredibly cathartic."
+    how_to: "Think about your feelings or experiences. Try to put them into words that rhyme or fit a simple melody. You can use the style of Mugithi, Gengetone, or any local genre that inspires you."
+    benefits: "Emotional release, creative expression, cultural connection, sense of accomplishment."
+    follow_up_questions:
+      - "Do you enjoy music? Do you ever sing or compose?"
+      - "What kind of emotions might you want to put into a song?"
+      - "Even humming a tune can help. Would you like to try?"
+
+# ======================
+# Digital & Traditional Tools (Consolidated)
+# ======================
+
+tool_integration: # Renamed from app_recommendations to be more general
+  digital:
+    description: "Digital tools can provide convenient support and tracking for your mental well-being."
+    apps: # Renamed from direct list to 'apps' for clarity
+      - name: "Nivishe Mental Health App"
+        features: "Kenyan mental health resources, daily prompts, mood tracking, affirmations."
+        link: "nivishe.go.ke"
+        how_to_use_with_bot: "Nivishe can complement our conversations by providing daily reminders and exercises. I can tell you more about its features or help you navigate what kind of support you might find there."
+        follow_up_questions:
+          - "Have you heard of the Nivishe app before?"
+          - "Are you interested in exploring mental health apps?"
+          - "What kind of features would be most helpful to you in an app?"
+      
+      - name: "My Courage Anxiety Helper" # Kept this specific app from coping_mechanisms.yml
+        features: "Anxiety tracking, guided exercises for anxiety, panic attack management."
+        os: "Android/iOS"
+        how_to_use_with_bot: "This app focuses specifically on anxiety. We can discuss its features or try a related exercise together."
+        follow_up_questions:
+          - "Are you looking for an app specifically for anxiety?"
+          - "Have you tried any anxiety-specific apps before?"
+
+      - name: "Sanvello" # From previous coping_strategies.yml
+        features: "Anxiety/stress tracking, guided meditations, CBT exercises."
+        how_to_use_with_bot: "Sanvello offers a range of tools. I can explain more about CBT or guided meditations if you're curious about how they work."
+        follow_up_questions:
+          - "Are you comfortable with international apps, or prefer local ones?"
+          - "Have you tried guided meditations before?"
+  
+  traditional:
+    description: "Traditional practices can offer comfort, connection, and a sense of grounding rooted in cultural heritage."
+    methods: # Renamed from direct list to 'methods' for clarity
+      - name: "Herbal tea preparation (mwarubaini, muguga)"
+        how_to: "Prepare a warm cup of traditional herbal tea. Focus on the aroma, the warmth of the cup, and the soothing sensation as you drink it. This can be a mindful ritual."
+        benefits: "Calming, ritualistic, connection to traditional healing."
+      - name: "Tying kanga with positive affirmations"
+        how_to: "Choose a kanga with a meaningful saying (methali). As you tie it, repeat the affirmation to yourself, letting the fabric symbolize your commitment to the message."
+        benefits: "Wearable affirmation, cultural connection, mindfulness."
+      - name: "Traditional storytelling" # General reference, specific examples in cultural_strategies
+        how_to: "Engage in or listen to traditional storytelling. These narratives often carry wisdom and provide a sense of cultural continuity and belonging."
+        benefits: "Cultural connection, intergenerational wisdom, emotional comfort."
+    follow_up_questions:
+      - "Are you interested in exploring traditional coping methods?"
+      - "Do you have a favorite herbal tea or kanga saying?"
+      - "How do traditional practices usually make you feel?"
+
+# ======================
+# Immediate Support Tips (Consolidated)
+# ======================
+
+immediate_support_tips:
+  description: "When you're feeling overwhelmed or in a difficult moment, these are quick, actionable steps you can take to seek immediate support or safety."
+  tips:
+    - name: "Call ndugu wa karibu (closest relative/trusted person)"
+      how_to: "Reach out to a family member, trusted friend, or elder who you feel safe talking to. Sometimes just hearing a familiar voice helps."
+      benefits: "Immediate emotional support, sense of connection, practical help."
+    - name: "Text 'HELP' to 741741"
+      how_to: "This is a crisis text line for immediate support. It's discreet and can be used when you can't or don't want to talk on the phone."
+      benefits: "Confidential, accessible, immediate support via text."
+    - name: "Visit nearest health center or trusted community leader"
+      how_to: "If you feel unsafe or need immediate professional attention, go to your nearest health center. For cultural support, a trusted community leader might offer guidance."
+      benefits: "Direct access to care, physical safety, community wisdom."
+  follow_up_questions:
+    - "Do you have someone specific in mind you could call right now?"
+    - "Are you feeling safe enough to reach out to one of these options?"
+    - "Which of these immediate tips feels most accessible to you right now?"
+
+# ======================
+# Safety Planning (Preventive) (Consolidated)
+# ======================
+
+safety_planning_preventive:
+  description: "Creating a personalized safety plan helps you prepare for difficult moments, identifying your triggers, coping methods, and support network before a crisis hits."
+  steps:
+    - name: "Create personalized coping playlist"
+      how_to: "Compile songs that uplift you, calm you, or distract you. Include Kenyan music that resonates with your spirit."
+      benefits: "Emotional regulation, distraction, personal comfort."
+    - name: "Save emergency contacts as 'Daktari' or 'Msaada'"
+      how_to: "Program key emergency numbers (Befrienders, family, trusted friends) into your phone under easy-to-find names like 'Daktari' (Doctor) or 'Msaada' (Help)."
+      benefits: "Quick access to support during distress, reduces thinking in crisis."
+    - name: "Identify your safe spaces"
+      how_to: "Think about places where you feel calm and secure, whether it's a quiet corner in your home, a local park, or a friend's house. Plan to go there when overwhelmed."
+      benefits: "Physical safety, mental comfort, sense of control."
+  follow_up_questions:
+    - "Do you have a personal coping playlist already?"
+    - "Who are the most important people to include in your emergency contacts?"
+    - "What's a place where you feel truly safe and at peace?"
+    - "Would you like to work on creating a full safety plan now or later?"
+
+# ======================
+# Metadata & Usage
+# ======================
+
+implementation:
+  difficulty_levels:
+    beginner: ["4-7-8 Breathing", "Market Walk Therapy", "Journaling", "Chores as Meditation"] # Added from coping_mechanisms
+    intermediate: ["5-4-3-2-1 Technique", "Chama meeting", "Composing Mugithi Lyrics", "Urban/Rural specific strategies"] # Added from coping_mechanisms
+    advanced: ["Trauma-sensitive grounding"] # Keep this as a placeholder for more complex techniques
+  
+  settings: # From coping_mechanisms.yml
+    home: "Chores as Meditation, Journaling"
+    work: "Desk stretches (if applicable), 4-7-8 Breathing"
+    public: "5-3-1 Grounding, Matatu strategies, Market Walk Therapy"
+
+  cultural_adaptation:
+    urban: ["Matatu strategies", "App use", "Market Walk Therapy", "Benga/Genge music"] # Expanded
+    rural: ["Fetch water meditation", "Harambee participation", "Traditional storytelling", "Communal farming"] # Expanded
+
+  last_reviewed_by: "Kelly AI Team" # Updated
+  notes: "Consolidated content from coping_mechanisms.yml. Removed redundant interactive_responses as intent classification handles triggers."

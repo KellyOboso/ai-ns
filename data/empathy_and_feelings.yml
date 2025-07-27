@@ -1,0 +1,247 @@
+# data/empathy_and_feelings.yml
+version: 3.3 # Updated version
+type: emotional_response
+last_updated: 2025-07-31 # Updated date
+
+# ======================
+# Emotional State Support
+# ======================
+
+emotional_states:
+  grief:
+    triggers:
+      - "lost someone"
+      - "nimepoteza mpendwa"  # Swahili: lost a loved one
+      - "passed away"
+      - "burial was..."
+      - "I'm grieving"
+      - "My heart aches"
+      - "It's hard without them"
+      - "I miss them so much"
+      - "Death of a loved one"
+      - "Feeling immense loss"
+      - "Kifo cha mpendwa" # Swahili: Death of a loved one
+    responses:
+      - "Pole sana kwa msiba wako. Grief has no timeline, and it's okay to feel everything you're feeling."  # Deep Swahili condolence
+      - "I hear your heart is aching. Would you like to share about them, or just talk about how you're coping?"
+      - "In many Kenyan cultures, we say 'pole' during times of loss. I'm here to listen to your memories or your pain."
+      - "Losing someone is incredibly difficult. I'm here to sit with you in your sadness."
+      - "It sounds like you're carrying a heavy burden of loss. How are you taking care of yourself through this?"
+    follow_up_questions: # Added follow-up questions
+      - "Would you like to share a memory of them?"
+      - "How are you coping with the day-to-day challenges of grief?"
+      - "Is there anything specific about your loss that you'd like to talk about?"
+      - "Are you surrounded by supportive people, or are you feeling isolated?"
+      - "Have you considered reaching out to a grief support group?"
+    cultural_notes:
+      - "Recognize 40-day mourning periods"
+      - "Acknowledge harusi ya jando traditions"  # Initiation ceremonies
+    resources:
+      local:
+        - "Befrienders Bereavement: 0722 510 366"
+        - "Nairobi Grief Circle: www.grief.co.ke"
+      national:
+        - "CRANE Counseling: 0800 720 700"
+
+  trauma:
+    triggers:
+      - "flashback"
+      - "PTSD"
+      - "nimeshambuliwa"  # Swahili: I was attacked
+      - "post-election violence"
+      - "I was abused"
+      - "I experienced something terrible"
+      - "I can't forget what happened"
+      - "Nightmares"
+      - "Feeling unsafe"
+      - "Dhiki kubwa" # Swahili: Big trauma/distress
+    responses:
+      - "Your reaction makes complete sense after what you survived. Hii ni dhiki kubwa, na tuko pamoja."  # Swahili: This is big trauma. We're together.
+      - "Let's focus on your safety right now. Where are you currently? Are you in a safe space?"
+      - "I hear you're experiencing immense distress. It takes incredible strength to talk about this."
+      - "Trauma can feel overwhelming. I'm here to support you through these feelings."
+      - "It's understandable to feel this way after such experiences. What's one thing that helps you feel a little safer right now?"
+    follow_up_questions: # Added follow-up questions
+      - "Are you currently in a safe environment?"
+      - "Would you like to try a grounding exercise to help bring you back to the present?"
+      - "Is there someone you can reach out to for immediate support?"
+      - "How is this affecting your daily life?"
+      - "Have you ever spoken to a professional about these experiences?"
+    grounding_techniques:
+      - "Name 3 red things in this room"
+      - "Feel your feet on the ground - unasimama wapi?"  # Swahili: Where are you standing?
+      - "Describe 5 things you can see, 4 things you can touch, 3 things you can hear, 2 things you can smell, and 1 thing you can taste."
+      - "Focus on your breath: Count to 4 as you inhale, hold for 4, exhale for 4."
+    professional_resources:
+      - "Nairobi Women's Hospital GBV Center: 0800 720 720"
+      - "Chiromo Trauma Program: 0709 036 000"
+      - "Kenya National GBV Hotline: 1195" # Added for directness
+
+# ======================
+# Kenyan-Specific Emotions & Struggles
+# ======================
+
+  shida_za_maisha:  # Life struggles / Economic hardship
+    triggers:
+      - "maisha ni magumu"  # Life is hard
+      - "hali ya uchumi"  # Economic situation
+      - "no money for school fees"
+      - "I can't find a job"
+      - "Poverty"
+      - "Kukosa kazi" # Swahili: No job
+      - "Njaa" # Hunger
+      - "Kodi" # Rent
+    responses:
+      - "Many Kenyans are struggling with hali ya uchumi and shida za maisha. You're definitely not alone in feeling this burden."
+      - "I hear the weight of your life struggles. While I can't solve them directly, I can help you find resources or coping strategies."
+      - "Would a list of NGO support services, job-seeking resources, or financial literacy tips be helpful?"
+      - "It sounds incredibly tough. What specific 'shida' is weighing on you most right now?"
+    follow_up_questions:
+      - "What specific financial or life challenge is causing you the most stress?"
+      - "Are you looking for practical resources, or just someone to listen?"
+      - "Would you like to explore coping strategies for dealing with financial stress?"
+      - "Have you heard about any local community initiatives that might offer support?"
+    resources:
+      - "Government Social Protection: 0720 600 000"
+      - "Wings to Fly Scholarships: 0709 109 000"
+      - "Youth Enterprise Development Fund: www.yedf.go.ke" # Added
+      - "Women Enterprise Fund: www.wef.co.ke" # Added
+
+  family_pressure:
+    triggers:
+      - "my family expects too much"
+      - "natakiwa kuoa/kuolewa"  # Marriage pressure
+      - "inheritance disputes"
+      - "Family conflict"
+      - "Parents don't understand"
+      - "Pressure to get married"
+      - "Disputes over land"
+      - "Wazazi wangu" # My parents
+      - "Ndoa" # Marriage
+    responses:
+      - "Family expectations and dynamics can weigh heavy on one's mental health. How is this affecting you personally?"
+      - "This is a common struggle in many Kenyan families. Would you like to explore some coping strategies for managing family pressure?"
+      - "I hear the burden you're carrying from your family. It's important to acknowledge your own feelings in this."
+      - "It sounds like you're navigating complex family situations. What kind of support do you need most right now?"
+    follow_up_questions:
+      - "What specific expectations are causing you the most distress?"
+      - "How do you usually handle these family pressures?"
+      - "Would you like to talk about setting boundaries, or finding ways to communicate your feelings?"
+      - "Are there any trusted family members or elders you can talk to about this?"
+    
+  unemployment_stress: # New category for a common Kenyan struggle
+    triggers:
+      - "I'm jobless"
+      - "Can't find work"
+      - "Kukosa kazi" # Swahili: No job
+      - "Unemployment"
+      - "Job search is hard"
+      - "Feeling useless without a job"
+    responses:
+      - "Unemployment can bring a lot of stress and feelings of hopelessness. Please know your worth isn't tied to your job status."
+      - "I hear the frustration in your words. Many Kenyans face this challenge. How is this affecting your mental well-being?"
+      - "While I can't get you a job, I can offer support in managing the stress that comes with unemployment."
+    follow_up_questions:
+      - "What kind of support would be most helpful right now – emotional, or resources for job searching?"
+      - "How are you spending your time while looking for work?"
+      - "Would you like to explore coping strategies for the emotional impact of unemployment?"
+    resources:
+      - "National Employment Authority: www.nea.go.ke"
+      - "BrighterMonday Kenya (job portal): www.brightermonday.co.ke"
+
+  election_anxiety: # New category for a recurring Kenyan stressor
+    triggers:
+      - "Elections are coming"
+      - "Political tension"
+      - "Election violence"
+      - "I'm scared about the elections"
+      - "Siasa inanichosha" # Swahili: Politics is tiring me
+    responses:
+      - "Political seasons in Kenya can bring a lot of anxiety and uncertainty. It's normal to feel worried."
+      - "I hear your concerns about the elections. What specifically is making you feel anxious?"
+      - "Remember to protect your peace during this time. Focus on what you can control."
+    follow_up_questions:
+      - "What specific aspects of the election are causing you the most stress?"
+      - "Are you consuming a lot of news, and is it affecting your mood?"
+      - "Would you like to talk about strategies to manage election-related anxiety?"
+      - "Do you have a support system to discuss these feelings with?"
+    resources:
+      - "IEBC (for official information): www.iebc.or.ke"
+      - "Peacebuilding organizations (e.g., NCIC): www.ncic.go.ke"
+
+# ======================
+# Validation Framework
+# ======================
+
+validation:
+  phrases:
+    - "Hii ni ngumu sana"  # Swahili: This is very hard
+    - "I hear the pain in your words"
+    - "Your reaction makes complete sense"
+    - "That's a completely valid way to feel."
+    - "It's understandable why you'd feel that way."
+    - "Ninasikia unachosema." # Swahili: I hear what you're saying.
+  
+  techniques:
+    - "Reflective listening: 'You feel...because...'"
+    - "Cultural proverbs when appropriate"
+    - "Non-verbal acknowledgment (when voice-enabled)"
+    - "Empathy statements: 'It sounds like you're feeling...'"
+
+# ======================
+# Response Guidelines (Internal Bot Logic)
+# ======================
+
+response_protocols:
+  dos:
+    - "Use 'pole' for grief and difficult situations"  # Swahili condolence
+    - "Incorporate appropriate proverbs and cultural references (e.g., Harambee, Ubuntu)"
+    - "Offer concrete Kenyan resources where applicable"
+    - "Maintain a warm, non-judgmental, and supportive tone"
+    - "Prioritize safety and crisis intervention"
+    - "Encourage user to elaborate with open-ended questions"
+  
+  donts:
+    - "Don't minimize with 'at least' statements or toxic positivity"
+    - "Avoid Western individualism in responses; emphasize community if appropriate"
+    - "Never suggest alcohol or harmful coping mechanisms"
+    - "Do not give medical advice or diagnoses"
+    - "Avoid making promises you cannot keep"
+
+# ======================
+# Crisis Bridge Phrases (Internal Bot Logic)
+# ======================
+
+crisis_transitions:
+  - when: "expressing suicidal thoughts"
+    say: "Nina wasiwasi sana. Tafadhali piga 0800 723 723 sasa"  # I'm very worried. Please call...
+    then: "Can you tell me where you are right now?"
+  
+  - when: "disclosing abuse"
+    say: "This is serious. Let me connect you to GBV hotline: 1195. Your safety is paramount."
+    follow_up: "Are you somewhere safe right now? Can you talk freely?"
+
+  - when: "expressing self-harm intent"
+    say: "I hear your pain. Please try to stay safe. Can we try a grounding exercise together?"
+    follow_up: "Are there any means of harm near you?"
+
+# ======================
+# Metadata & Localization
+# ======================
+
+metadata:
+  cultural_adaptation:
+    swahili_integration: 35% # Increased
+    sheng_integration: 18%  # Increased
+    local_references: high
+  
+  sensitivity_levels:
+    grief: high
+    trauma: critical
+    loneliness: medium
+    family_pressure: medium
+    shida_za_maisha: high
+    unemployment_stress: high
+    election_anxiety: high
+
+  last_reviewed: "2025-07-31 by Kelly AI Team" # Updated review date
