@@ -121,3 +121,40 @@ Access the Admin Dashboard by logging in with your `ADMIN_EMAIL`.
     * **Important:** After adding data via the Admin Dashboard, you **must manually run `python3 train.py` in your terminal** and then **restart `streamlit run app.py`** for the new data to be incorporated into the AI model. This step is for development/data curation only.
 
 ## 📁 Project Structure
+.
+├── .venv/                   # Python virtual environment
+├── data/                    # YAML data files for bot knowledge base
+│   ├── affirmations.yml
+│   ├── bot_profile.yml
+│   ├── coping_strategies.yml
+│   ├── crisis_support.yml
+│   ├── cultural_responses.yml
+│   ├── empathy_and_feelings.yml
+│   ├── fallbacks.yml
+│   ├── greetings.yml
+│   ├── intents.yml
+│   ├── mental_health_chatbot.db  # Database for logging training data
+│   ├── resources_and_crisis.yml
+│   └── user_feedback.yml
+├── models/                  # Trained AI models
+│   ├── intent_classifier.joblib
+│   └── label_encoder.joblib
+├── .env                     # Environment variables (e.g., admin credentials)
+├── app.py                   # Main Streamlit application
+├── requirements.txt         # Python dependencies
+├── train.py                 # Script for training the NLU model
+└── users.db                 # Database for user accounts, conversations, stories, contacts
+
+
+## 📈 Future Improvements (Ideas)
+
+* **Automated Model Retraining & Deployment:** Implement a CI/CD pipeline or background service to automate retraining and model updates.
+* **Advanced NLU:** Integrate with external NLU services like Dialogflow or Rasa for more sophisticated conversational understanding.
+* **Voice Interface:** Add speech-to-text and text-to-speech capabilities.
+* **Personalized Experience:** Store user preferences (with consent) to tailor responses and resource recommendations.
+* **Sentiment Trend Analysis:** Visualize user sentiment over time in the Admin Dashboard.
+* **AI-Driven Follow-ups:** More intelligent and adaptive follow-up questions based on conversation history.
+
+## ❤️ Credits
+
+Developed by Kelly Oboso.
