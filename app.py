@@ -190,7 +190,7 @@ def load_all_resources_cached(): # Renamed to clearly indicate it's the cached v
         resources_dict['fallbacks_escalation'] = []
 
     logger.info("All YAML resources loaded into GLOBAL_RESOURCES.")
-    return resources_dict # Return the local dict for caching
+    return resources_dict 
 
 
 @st.cache_resource(show_spinner="Loading AI model...")
@@ -506,17 +506,17 @@ def get_random_coping_strategy_detail(strategy_type=None):
         if list_key and isinstance(category_data, dict) and list_key in category_data and isinstance(category_data[list_key], list):
             for item in category_data[list_key]:
                 if isinstance(item, dict):
-                    item_copy = item.copy() # Make a copy to add source_type
+                    item_copy = item.copy() 
                     item_copy['source_type'] = source_label 
                     all_strategies_flat.append(item_copy)
         elif isinstance(category_data, list): 
             for item in category_data:
                 if isinstance(item, dict):
-                    item_copy = item.copy() # Make a copy
+                    item_copy = item.copy() 
                     item_copy['source_type'] = source_label
                     all_strategies_flat.append(item_copy)
         elif isinstance(category_data, dict) and source_label: 
-             item_copy = category_data.copy() # Make a copy
+             item_copy = category_data.copy() 
              item_copy['source_type'] = source_label
              all_strategies_flat.append(item_copy)
 
@@ -583,7 +583,7 @@ def get_random_affirmation_detail(affirmation_type=None):
     def add_affirmations_from_category(category_dict, source_type):
         if category_dict and source_type in category_dict and 'list' in category_dict[source_type]:
             for item in category_dict[source_type]['list']:
-                item_copy = item.copy() # Make a copy
+                item_copy = item.copy() 
                 item_copy['type'] = source_type
                 target_list.append(item_copy)
 
@@ -812,7 +812,6 @@ def find_response(user_input):
             if responses:
                 bot_response = random.choice(responses)
                 
-                # Special handling for intents that offer options, setting expected_next_action
                 if predicted_intent == 'seek_coping_strategies':
                     st.session_state.expected_next_action = 'ask_coping_strategy_choice'
                 elif predicted_intent == 'seek_affirmation' or predicted_intent == 'seek_contextual_affirmation':
@@ -1393,7 +1392,7 @@ def show_admin():
         if st.button("Add Training Pattern", key="add_training_pattern_button"):
             if new_pattern and selected_intent_tag != "-- Select Intent --":
                 try:
-                    current_intents_yaml = load_yaml(INTENTS_FILE)
+                    current_intents_yaml = load_yaml_cached(INTENTS_FILE) # Use cached load
                     if not current_intents_yaml:
                         current_intents_yaml = {'version': 1.0, 'type': 'intent_classification', 'last_updated': datetime.now().isoformat().split('T')[0], 'intents': []}
                     
@@ -1469,13 +1468,13 @@ def main():
         st.session_state.initial_greeting_sent = False
 
 
-    loaded_resources = load_all_resources() 
+    loaded_resources = load_all_resources_cached() # Use the cached version
     global GLOBAL_RESOURCES 
     GLOBAL_RESOURCES = loaded_resources 
 
     global CLASSIFIER_MODEL, LABEL_ENCODER 
-    CLASSIFIER_MODEL, LABEL_ENCODER = load_classifier_model()
-    init_user_db() 
+    CLASSIFIER_MODEL, LABEL_ENCODER = load_classifier_model_cached() # Use the cached version
+    init_user_db_cached() # Use the cached version
 
     if st.session_state.page == "chat_page" and st.session_state.conversation_id is None:
         user_id_for_conv = st.session_state.current_user.get('id') if st.session_state.get('current_user') else None
