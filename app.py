@@ -19,25 +19,32 @@ load_dotenv()
 
 # --- Configuration and Setup ---
 
-# Set up logging (moved here as it's safe at global scope)
+# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('MentalHealthBot')
 
-# Define paths (safe at global scope)
+# Define paths
 DATA_DIR = 'data'
 MODELS_DIR = 'models'
 USERS_DB_PATH = 'users.db' 
 TRAINING_DATA_DB_PATH = os.path.join(DATA_DIR, 'mental_health_chatbot.db') 
 
-# Admin credentials from environment variables for security (safe at global scope)
+# Admin credentials from environment variables for security
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@example.com") 
 ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "") 
 
-# Ensure data and models directories exist (safe at global scope)
+# Ensure data and models directories exist
 os.makedirs(DATA_DIR, exist_ok=True) 
 os.makedirs(MODELS_DIR, exist_ok=True) 
 
-# YAML file paths (safe at global scope)
+# Point NLTK to the custom data directory (must be before any TextBlob/NLTK usage)
+NLTK_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', 'nltk_data')
+if NLTK_DATA_DIR not in nltk.data.path:
+    nltk.data.path.append(NLTK_DATA_DIR)
+    logger.info(f"NLTK data path added: {NLTK_DATA_DIR}")
+
+
+# YAML file paths
 INTENTS_FILE = os.path.join(DATA_DIR, 'intents.yml')
 BOT_PROFILE_FILE = os.path.join(DATA_DIR, 'bot_profile.yml')
 COPING_STRATEGIES_FILE = os.path.join(DATA_DIR, 'coping_strategies.yml') 
@@ -57,7 +64,7 @@ CLASSIFIER_MODEL = None
 LABEL_ENCODER = None 
 
 @st.cache_data(show_spinner="Loading AI knowledge base...")
-def load_yaml_cached(filepath): 
+def load_yaml_cached(filepath):
     """Loads a YAML file from the specified path, designed for caching."""
     try:
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -69,23 +76,10 @@ def load_yaml_cached(filepath):
         logger.error(f"Error parsing YAML file {filepath}: {e}")
         return None
 
-@st.cache_resource(show_spinner="Loading all bot resources and NLTK data...")
+@st.cache_resource(show_spinner="Loading all bot resources...")
 def load_all_resources_cached():
-    """Loads all YAML resource files into GLOBAL_RESOURCES and downloads NLTK data."""
+    """Loads all YAML resource files into GLOBAL_RESOURCES."""
     
-    # --- NLTK Downloads (Moved here, inside cached function) ---
-    try:
-        nltk.download('punkt', quiet=True)
-        logger.info("NLTK 'punkt' tokenizer downloaded/checked.")
-    except Exception as e:
-        logger.error(f"Error downloading NLTK 'punkt': {e}")
-    try:
-        nltk.download('stopwords', quiet=True)
-        logger.info("NLTK 'stopwords' downloaded/checked.")
-    except Exception as e:
-        logger.error(f"Error downloading NLTK 'stopwords': {e}")
-    # --- End NLTK Downloads ---
-
     resources_dict = {} 
 
     # Load Intents - Store as a dictionary for easy lookup by tag
@@ -670,7 +664,6 @@ def find_response(user_input):
             selected_strategy = get_random_coping_strategy_detail() 
             if selected_strategy:
                 bot_response = f"Excellent! Let's try **{selected_strategy.get('name', 'a coping strategy')}**."
-                # For coping strategies, pick a random how_to_guide element if it's a list
                 if selected_strategy.get('how_to_guide') and isinstance(selected_strategy['how_to_guide'], list):
                     bot_response += f" Here's how: {random.choice(selected_strategy['how_to_guide'])}"
                 elif selected_strategy.get('description'):
@@ -717,7 +710,7 @@ def find_response(user_input):
              if therapy_resources_kenya:
                  selected_resource = random.choice(therapy_resources_kenya)
                  bot_response = f"Okay, here's a professional resource: **{selected_resource.get('name')}**. They offer {selected_resource.get('services', 'various services')}. Contact: {selected_resource.get('contact', 'N/A')}."
-                 if selected_resource.get('follow_up_questions'): # Check for follow_up_questions in resource entry
+                 if selected_resource.get('follow_up_questions'):
                      bot_response += f" {random.choice(selected_resource['follow_up_questions'])}"
                  else:
                      bot_response += " Would you like to know more about this resource?"
@@ -1334,8 +1327,8 @@ def show_admin():
                 st.write(f"Current Plan for **{selected_user_display}**: {plan_id_to_name.get(current_plan_id, 'N/A')}")
                 st.write(f"Current Expiration: {current_expiration_date if current_expiration_date else 'Never / N/A'}")
 
-                new_plan_name = st.selectbox("Assign New Plan", ["-- Select Plan --"] + [p[1] for p in all_plans], key="assign_new_plan") # Use all plan names
-                plan_name_to_id = {p[1]: p[0] for p in all_plans} # Make sure this is defined
+                new_plan_name = st.selectbox("Assign New Plan", ["-- Select Plan --"] + [p[1] for p in all_plans], key="assign_new_plan") 
+                plan_name_to_id = {p[1]: p[0] for p in all_plans} 
                 
                 if new_plan_name != "-- Select Plan --":
                     new_plan_id = plan_name_to_id[new_plan_name]
