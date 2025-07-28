@@ -17,37 +17,27 @@ import pandas as pd
 # --- Load Environment Variables ---
 load_dotenv() 
 
-# --- NLTK Downloads (for TextBlob in app.py) ---
-try:
-    nltk.data.find('tokenizers/punkt')
-except nltk.downloader.DownloadError:
-    nltk.download('punkt', quiet=True)
-try:
-    nltk.data.find('corpora/stopwords')
-except nltk.downloader.DownloadError:
-    nltk.download('stopwords', quiet=True)
-
 # --- Configuration and Setup ---
 
-# Set up logging
+# Set up logging (moved here as it's safe at global scope)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger('MentalHealthBot')
 
-# Define paths
+# Define paths (safe at global scope)
 DATA_DIR = 'data'
 MODELS_DIR = 'models'
 USERS_DB_PATH = 'users.db' 
 TRAINING_DATA_DB_PATH = os.path.join(DATA_DIR, 'mental_health_chatbot.db') 
 
-# Admin credentials from environment variables for security
+# Admin credentials from environment variables for security (safe at global scope)
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@example.com") 
 ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "") 
 
-# Ensure data and models directories exist
+# Ensure data and models directories exist (safe at global scope)
 os.makedirs(DATA_DIR, exist_ok=True) 
 os.makedirs(MODELS_DIR, exist_ok=True) 
 
-# YAML file paths
+# YAML file paths (safe at global scope)
 INTENTS_FILE = os.path.join(DATA_DIR, 'intents.yml')
 BOT_PROFILE_FILE = os.path.join(DATA_DIR, 'bot_profile.yml')
 COPING_STRATEGIES_FILE = os.path.join(DATA_DIR, 'coping_strategies.yml') 
@@ -67,7 +57,7 @@ CLASSIFIER_MODEL = None
 LABEL_ENCODER = None 
 
 @st.cache_data(show_spinner="Loading AI knowledge base...")
-def load_yaml_cached(filepath): # Renamed to avoid confusion with internal load_yaml in init_admin_data
+def load_yaml_cached(filepath): 
     """Loads a YAML file from the specified path, designed for caching."""
     try:
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -79,11 +69,24 @@ def load_yaml_cached(filepath): # Renamed to avoid confusion with internal load_
         logger.error(f"Error parsing YAML file {filepath}: {e}")
         return None
 
-@st.cache_resource(show_spinner="Loading all bot resources...")
-def load_all_resources_cached(): # Renamed to clearly indicate it's the cached version
-    """Loads all YAML resource files into GLOBAL_RESOURCES."""
+@st.cache_resource(show_spinner="Loading all bot resources and NLTK data...")
+def load_all_resources_cached():
+    """Loads all YAML resource files into GLOBAL_RESOURCES and downloads NLTK data."""
     
-    resources_dict = {} # Use a local dict to build, then assign to global
+    # --- NLTK Downloads (Moved here, inside cached function) ---
+    try:
+        nltk.download('punkt', quiet=True)
+        logger.info("NLTK 'punkt' tokenizer downloaded/checked.")
+    except Exception as e:
+        logger.error(f"Error downloading NLTK 'punkt': {e}")
+    try:
+        nltk.download('stopwords', quiet=True)
+        logger.info("NLTK 'stopwords' downloaded/checked.")
+    except Exception as e:
+        logger.error(f"Error downloading NLTK 'stopwords': {e}")
+    # --- End NLTK Downloads ---
+
+    resources_dict = {} 
 
     # Load Intents - Store as a dictionary for easy lookup by tag
     intents_data_raw = load_yaml_cached(INTENTS_FILE)
@@ -189,12 +192,12 @@ def load_all_resources_cached(): # Renamed to clearly indicate it's the cached v
         resources_dict['fallbacks_default'] = []
         resources_dict['fallbacks_escalation'] = []
 
-    logger.info("All YAML resources loaded into GLOBAL_RESOURCES.")
+    logger.info("All YAML resources loaded into resources_dict.")
     return resources_dict 
 
 
 @st.cache_resource(show_spinner="Loading AI model...")
-def load_classifier_model_cached(): # Renamed to clearly indicate it's the cached version
+def load_classifier_model_cached():
     """Loads the pre-trained intent classifier model and label encoder."""
     classifier_model = None
     label_encoder = None
@@ -223,7 +226,7 @@ def load_classifier_model_cached(): # Renamed to clearly indicate it's the cache
 # --- Database Functions (for users.db) ---
 
 @st.cache_resource(show_spinner="Initializing user database...")
-def init_user_db_cached(): # Renamed for clarity and caching
+def init_user_db_cached():
     """Initialize database for users, conversations, and messages."""
     with sqlite3.connect(USERS_DB_PATH) as conn: 
         cursor = conn.cursor()
@@ -667,7 +670,8 @@ def find_response(user_input):
             selected_strategy = get_random_coping_strategy_detail() 
             if selected_strategy:
                 bot_response = f"Excellent! Let's try **{selected_strategy.get('name', 'a coping strategy')}**."
-                if selected_strategy.get('how_to_guide') and selected_strategy['how_to_guide']:
+                # For coping strategies, pick a random how_to_guide element if it's a list
+                if selected_strategy.get('how_to_guide') and isinstance(selected_strategy['how_to_guide'], list):
                     bot_response += f" Here's how: {random.choice(selected_strategy['how_to_guide'])}"
                 elif selected_strategy.get('description'):
                     bot_response += f" {selected_strategy['description']}"
@@ -713,7 +717,7 @@ def find_response(user_input):
              if therapy_resources_kenya:
                  selected_resource = random.choice(therapy_resources_kenya)
                  bot_response = f"Okay, here's a professional resource: **{selected_resource.get('name')}**. They offer {selected_resource.get('services', 'various services')}. Contact: {selected_resource.get('contact', 'N/A')}."
-                 if selected_resource.get('follow_up_questions'):
+                 if selected_resource.get('follow_up_questions'): # Check for follow_up_questions in resource entry
                      bot_response += f" {random.choice(selected_resource['follow_up_questions'])}"
                  else:
                      bot_response += " Would you like to know more about this resource?"
@@ -812,6 +816,7 @@ def find_response(user_input):
             if responses:
                 bot_response = random.choice(responses)
                 
+                # Special handling for intents that offer options, setting expected_next_action
                 if predicted_intent == 'seek_coping_strategies':
                     st.session_state.expected_next_action = 'ask_coping_strategy_choice'
                 elif predicted_intent == 'seek_affirmation' or predicted_intent == 'seek_contextual_affirmation':
@@ -929,7 +934,7 @@ def show_chat():
 
     # Accept user input
     if prompt := st.chat_input("What's on your mind?"):
-        if has_exceeded_usage(st.session_state.current_user.get('id', 'anonymous_session_init')): # Use the anonymous ID if not logged in
+        if has_exceeded_usage(st.session_state.current_user.get('id', 'anonymous_session_init')): 
             st.warning("You've exceeded your conversation limit. Please upgrade your plan or log in.")
             return 
 
@@ -1316,10 +1321,6 @@ def show_admin():
             all_plans = c.fetchall()
         
         user_options = {f"{u[1]} ({u[2]})": u[0] for u in non_admin_users} 
-        plan_name_to_id = {p[1]: p[0] for p in all_plans} 
-        plan_id_to_name = {p[0]: p[1] for p in all_plans} 
-
-
         selected_user_display = st.selectbox("Select User", ["-- Select User --"] + list(user_options.keys()), key="select_user_for_plan")
         
         if selected_user_display != "-- Select User --":
@@ -1333,7 +1334,8 @@ def show_admin():
                 st.write(f"Current Plan for **{selected_user_display}**: {plan_id_to_name.get(current_plan_id, 'N/A')}")
                 st.write(f"Current Expiration: {current_expiration_date if current_expiration_date else 'Never / N/A'}")
 
-                new_plan_name = st.selectbox("Assign New Plan", ["-- Select Plan --"] + list(plan_name_to_id.keys()), key="assign_new_plan")
+                new_plan_name = st.selectbox("Assign New Plan", ["-- Select Plan --"] + [p[1] for p in all_plans], key="assign_new_plan") # Use all plan names
+                plan_name_to_id = {p[1]: p[0] for p in all_plans} # Make sure this is defined
                 
                 if new_plan_name != "-- Select Plan --":
                     new_plan_id = plan_name_to_id[new_plan_name]
@@ -1392,7 +1394,7 @@ def show_admin():
         if st.button("Add Training Pattern", key="add_training_pattern_button"):
             if new_pattern and selected_intent_tag != "-- Select Intent --":
                 try:
-                    current_intents_yaml = load_yaml_cached(INTENTS_FILE) # Use cached load
+                    current_intents_yaml = load_yaml_cached(INTENTS_FILE)
                     if not current_intents_yaml:
                         current_intents_yaml = {'version': 1.0, 'type': 'intent_classification', 'last_updated': datetime.now().isoformat().split('T')[0], 'intents': []}
                     
@@ -1468,13 +1470,13 @@ def main():
         st.session_state.initial_greeting_sent = False
 
 
-    loaded_resources = load_all_resources_cached() # Use the cached version
+    loaded_resources = load_all_resources_cached() 
     global GLOBAL_RESOURCES 
     GLOBAL_RESOURCES = loaded_resources 
 
     global CLASSIFIER_MODEL, LABEL_ENCODER 
-    CLASSIFIER_MODEL, LABEL_ENCODER = load_classifier_model_cached() # Use the cached version
-    init_user_db_cached() # Use the cached version
+    CLASSIFIER_MODEL, LABEL_ENCODER = load_classifier_model_cached() 
+    init_user_db_cached() 
 
     if st.session_state.page == "chat_page" and st.session_state.conversation_id is None:
         user_id_for_conv = st.session_state.current_user.get('id') if st.session_state.get('current_user') else None
