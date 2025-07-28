@@ -13,6 +13,7 @@ import numpy as np
 import random 
 from textblob import TextBlob # Added for sentiment analysis consistency in train.py
 import nltk # Added for TextBlob dependency
+import re # For regex in normalization and entity extraction
 
 # --- Configuration and Setup ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -23,19 +24,13 @@ MODELS_DIR = 'models'
 TRAINING_DB_PATH = os.path.join(DATA_DIR, 'mental_health_chatbot.db') 
 INTENTS_FILE = os.path.join(DATA_DIR, 'intents.yml')
 TRAINING_DATA_FILE = os.path.join(DATA_DIR, 'training_data.yml')
-# Added paths for other YAMLs used in loading for logging purposes
-COPING_STRATEGIES_FILE = os.path.join(DATA_DIR, 'coping_strategies.yml') 
-CRISIS_SUPPORT_FILE = os.path.join(DATA_DIR, 'crisis_support.yml')
-EMPATHY_AND_FEELINGS_FILE = os.path.join(DATA_DIR, 'empathy_and_feelings.yml')
-GREETINGS_FILE = os.path.join(DATA_DIR, 'greetings.yml')
-AFFIRMATIONS_FILE = os.path.join(DATA_DIR, 'affirmations.yml')
-RESOURCES_AND_CRISIS_FILE = os.path.join(DATA_DIR, 'resources_and_crisis.yml')
 
 # Ensure directories exist
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 # --- NLTK Downloads (for TextBlob in train.py) ---
+# Ensure these are downloaded when train.py runs, to prepare environment
 try:
     nltk.data.find('tokenizers/punkt')
 except nltk.downloader.DownloadError:
@@ -44,10 +39,14 @@ try:
     nltk.data.find('corpora/stopwords')
 except nltk.downloader.DownloadError:
     nltk.download('stopwords', quiet=True)
+try:
+    nltk.data.find('taggers/averaged_perceptron_tagger') # Needed for pos_tag
+except nltk.downloader.DownloadError:
+    nltk.download('averaged_perceptron_tagger', quiet=True)
+
 
 # Kenyan-specific stopwords (consistent with app.py)
 kenyan_stopwords = {'kwani', 'sasa', 'hapo', 'bado', 'sana', 'tu', 'kwa', 'mambo', 'niaje', 'sema', 'msee', 'fiti', 'nzuri', 'barikiwa', 'shukran', 'pole', 'sad', 'huzuni', 'mbaya', 'stress', 'pressure', 'kufa', 'shida', 'majuto', 'not okay', 'depressed', 'afraid', 'low', 'worthless', 'hopeless', 'terrible', 'awful', 'bad', 'maisha ni ngumu', 'nimechoka', 'broken'}
-from nltk.corpus import stopwords
 stop_words = set(stopwords.words('english')).union(kenyan_stopwords)
 
 
@@ -134,18 +133,19 @@ def normalize_text(text):
     # (Currently, app.py uses simple lower().strip() before passing to model)
     text = text.lower()
     text = re.sub(r'[^\w\s\'\-]', '', text)  
-    tokens = nltk.word_tokenize(text) # Ensure nltk.word_tokenize is used
-    tokens = [word for word in tokens if word not in stop_words and len(word) > 1] # len > 1 to keep short words
+    tokens = nltk.word_tokenize(text) 
+    # Use global stop_words defined at top
+    tokens = [word for word in tokens if word not in stop_words and len(word) > 1] 
     return ' '.join(tokens)
 
 def detect_language_mix(text):
     """Detect language mix in Kenyan context."""
-    swahili_words = {'sasa', 'mambo', 'sema', 'niaje', 'poa', 'habari', 'asubuhi', 'jioni', 'mchana', 'kwaheri', 'ndugu', 'dada', 'karibu', 'asante', 'pole', 'nimechoka', 'shida', 'jina', 'maisha', 'ndiyo', 'na' 'am', 'sawa'}
-    sheng_words = {'msee', 'fiti', 'nare', 'mbogi', 'radhi', 'buda', 'supa', 'manze'}
+    swahili_words = {'sasa', 'mambo', 'sema', 'niaje', 'poa', 'habari', 'asubuhi', 'jioni', 'mchana', 'kwaheri', 'ndugu', 'dada', 'karibu', 'asante', 'pole', 'nimechoka', 'shida', 'jina', 'maisha', 'ndiyo', 'na' 'am', 'sawa', 'umeamkaje', 'jioni'}
+    sheng_words = {'msee', 'fiti', 'nare', 'mbogi', 'radhi', 'buda', 'supa', 'manze', 'vipi'}
     
     has_swahili = any(word in text.lower() for word in swahili_words)
     has_sheng = any(word in text.lower() for word in sheng_words)
-    has_english = any(word in text.lower() for word in {'how', 'what', 'when', 'why', 'feel', 'help', 'is', 'am', 'i', 'you', 'my', 'me', 'not', 'okay', 'the'})
+    has_english = any(word in text.lower() for word in {'how', 'what', 'when', 'why', 'feel', 'help', 'is', 'am', 'i', 'you', 'my', 'me', 'not', 'okay', 'the', 'a', 'to', 'for', 'about', 'can', 'do', 'i\'m'})
     
     lang_flags = {
         'swahili': has_swahili,
@@ -174,7 +174,7 @@ def extract_kenyan_entities(text):
     
     entities = []
     kenyan_locations = {'nairobi', 'mombasa', 'kisumu', 'nakuru', 'eldoret', 'thika', 'kenya', 'umoja', 'kibera', 'donholm'}
-    kenyan_roles = {'mganga', 'mama mboga', 'chama', 'daktari', 'ndugu', 'mzee'} 
+    kenyan_roles = {'mganga', 'mama mboga', 'chama', 'daktari', 'ndugu', 'mzee', 'baba', 'mama', 'sista', 'bro', 'teacher', 'pastor', 'sheikh'} 
 
     for word, pos in tagged:
         word_lower = word.lower()
@@ -185,168 +185,180 @@ def extract_kenyan_entities(text):
 
 # --- Data Loading and Preparation for Training ---
 def load_and_prepare_data():
-    """Loads data from intents.yml and training_data.yml and prepares it for training."""
-    intents_data = load_yaml(INTENTS_FILE)
-    training_samples_data = load_yaml(TRAINING_DATA_FILE)
+    """Loads data from all YAML files and prepares it for training."""
+    
+    # Paths for all YAMLs that contribute training data
+    intents_file_path = INTENTS_FILE
+    training_data_file_path = TRAINING_DATA_FILE
+    coping_strategies_file_path = COPING_STRATEGIES_FILE
+    empathy_and_feelings_file_path = EMPATHY_AND_FEELINGS_FILE
+    crisis_support_file_path = CRISIS_SUPPORT_FILE
+    affirmations_file_path = AFFIRMATIONS_FILE
+    resources_and_crisis_file_path = RESOURCES_AND_CRISIS_FILE # For mythbusters, etc.
+    greetings_file_path = GREETINGS_FILE # For greeting patterns
 
-    if not intents_data or 'intents' not in intents_data:
-        logger.error("Intents data not loaded or malformed.")
-        return [], [], []
+
+    # Load all YAML files
+    intents_data = load_yaml(intents_file_path)
+    training_samples_data = load_yaml(training_data_file_path)
+    coping_strategies_data = load_yaml(coping_strategies_file_path)
+    empathy_data = load_yaml(empathy_and_feelings_file_path)
+    crisis_data = load_yaml(crisis_support_file_path)
+    affirmations_data = load_yaml(affirmations_file_path)
+    resources_data = load_yaml(resources_and_crisis_file_path)
+    greetings_data = load_yaml(greetings_file_path)
+
 
     X = [] 
     y = [] 
     processed_training_data_log = [] 
 
-    # Process data from intents.yml
-    for intent in intents_data['intents']:
-        tag = intent['tag']
-        patterns = intent.get('patterns', [])
-        responses = intent.get('responses', []) 
+    # Helper function to add data to X, y, and log
+    def add_training_data(input_text, intent_tag, response_output, source_file, metadata=None):
+        if not input_text or not intent_tag:
+            return
         
-        urgency_level = intent.get('metadata', {}).get('risk_level', 'low')
+        X.append(normalize_text(input_text))
+        y.append(intent_tag)
         
-        for pattern in patterns:
-            X.append(normalize_text(pattern)) # Use normalize_text for classifier
-            y.append(tag)
-            
-            # Log data for bot_responses table
-            processed_training_data_log.append({
-                'input_text': pattern,
-                'normalized_text': normalize_text(pattern),
-                'output': random.choice(responses) if responses else "No response defined.",
-                'intent': tag,
-                'sentiment': analyze_sentiment_train(pattern), # Use sentiment from TextBlob
-                'entities': extract_kenyan_entities(pattern), # Extract entities
-                'urgency_level': urgency_level,
-                'language_mix': detect_language_mix(pattern), # Detect language mix
-                'source_file': 'intents.yml'
-            })
+        sentiment_val = analyze_sentiment_train(input_text)
+        entities_val = extract_kenyan_entities(input_text)
+        language_mix_val = detect_language_mix(input_text)
+        urgency_val = metadata.get('risk_level', 'low') if metadata else 'low'
+        
+        processed_training_data_log.append({
+            'input_text': input_text,
+            'normalized_text': normalize_text(input_text),
+            'output': response_output,
+            'intent': intent_tag,
+            'sentiment': sentiment_val,
+            'entities': entities_val,
+            'urgency_level': urgency_val,
+            'language_mix': language_mix_val,
+            'source_file': os.path.basename(source_file)
+        })
 
-    # Process data from training_data.yml (conversation_samples and special_cases)
+    # --- 1. Process data from intents.yml (Primary source of intents) ---
+    if intents_data and 'intents' in intents_data:
+        for intent_entry in intents_data['intents']:
+            tag = intent_entry.get('tag')
+            patterns = intent_entry.get('patterns', [])
+            responses = intent_entry.get('responses', [])
+            example_response = random.choice(responses) if responses else "No response defined."
+            metadata = intent_entry.get('metadata', {})
+
+            for pattern in patterns:
+                add_training_data(pattern, tag, example_response, intents_file_path, metadata)
+
+    # --- 2. Process data from training_data.yml (Conversation Samples, Special Cases, Localized) ---
     if training_samples_data:
-        conversation_samples = training_samples_data.get('conversation_samples', [])
-        special_cases = training_samples_data.get('special_cases', {})
-        localized_content = training_samples_data.get('localized_content', [])
-        crisis_interventions = training_samples_data.get('crisis_interventions', [])
-        training_cautions = training_samples_data.get('training_cautions', [])
-
-
-        for sample in conversation_samples:
-            input_text = sample.get('input')
-            output_text = sample.get('output')
-            metadata = sample.get('metadata', {})
-            
-            if input_text and output_text:
-                X.append(normalize_text(input_text)) # Use normalize_text
-                sample_intent = sample.get('intent')
-                if sample_intent:
-                    y.append(sample_intent)
-                elif metadata.get('tags'):
-                    y.append(metadata.get('tags')[0]) 
-                else:
-                    y.append("unknown_intent")
-                
-                processed_training_data_log.append({
-                    'input_text': input_text,
-                    'normalized_text': normalize_text(input_text),
-                    'output': output_text,
-                    'intent': sample_intent if sample_intent else (metadata.get('tags', ["unknown_intent"])[0] if metadata.get('tags') else "unknown_intent"),
-                    'sentiment': analyze_sentiment_train(input_text), 
-                    'entities': extract_kenyan_entities(input_text), 
-                    'urgency_level': metadata.get('urgency', 'low') if 'urgency' in metadata else 'low', # Use 'urgency' from metadata
-                    'language_mix': detect_language_mix(input_text),
-                    'source_file': 'training_data.yml'
-                })
-
-        for case_type, cases in special_cases.items(): # e.g., 'trauma', 'psychosis'
+        # conversation_samples
+        for sample in training_samples_data.get('conversation_samples', []):
+            add_training_data(sample.get('input'), sample.get('intent'), sample.get('output'), training_data_file_path, sample.get('metadata', {}))
+        
+        # special_cases
+        for case_type, cases in training_samples_data.get('special_cases', {}).items():
             for case in cases:
-                input_text = case.get('input')
-                output_text = case.get('output')
-                metadata = case.get('metadata', {})
-                
-                if input_text and output_text:
-                    X.append(normalize_text(input_text))
-                    case_intent = case.get('intent')
-                    if case_intent:
-                        y.append(case_intent)
-                    else:
-                        y.append(case_type) 
-                    
-                    processed_training_data_log.append({
-                        'input_text': input_text,
-                        'normalized_text': normalize_text(input_text),
-                        'output': output_text,
-                        'intent': case_intent if case_intent else case_type,
-                        'sentiment': analyze_sentiment_train(input_text), 
-                        'entities': extract_kenyan_entities(input_text), 
-                        'urgency_level': metadata.get('urgency', 'low') if 'urgency' in metadata else 'low', # Use 'urgency' from metadata
-                        'language_mix': detect_language_mix(input_text),
-                        'source_file': 'training_data.yml'
-                    })
-
-        for content in localized_content:
-            input_text = content.get('input')
-            output_text = content.get('output')
-            metadata = content.get('metadata', {})
-
-            if input_text and output_text:
-                X.append(normalize_text(input_text))
-                content_intent = content.get('intent')
-                if content_intent:
-                    y.append(content_intent)
-                else:
-                    y.append(metadata.get('tag', 'localized_content')) 
-                
-                processed_training_data_log.append({
-                    'input_text': input_text,
-                    'normalized_text': normalize_text(input_text),
-                    'output': output_text,
-                    'intent': content_intent if content_intent else metadata.get('tag', 'localized_content'),
-                    'sentiment': analyze_sentiment_train(input_text), 
-                    'entities': extract_kenyan_entities(input_text), 
-                    'urgency_level': metadata.get('urgency', 'low') if 'urgency' in metadata else 'low', 
-                    'language_mix': detect_language_mix(input_text),
-                    'source_file': 'training_data.yml'
-                })
+                add_training_data(case.get('input'), case.get('intent', case_type), case.get('output'), training_data_file_path, case.get('metadata', {}))
         
-        # Add crisis_interventions from training_data.yml
-        for intervention in crisis_interventions:
-            input_text = intervention.get('input')
-            output_text = intervention.get('output')
-            metadata = intervention.get('metadata', {})
-            if input_text and output_text:
-                X.append(normalize_text(input_text))
-                y.append(intervention.get('intent', 'crisis_intervention_unknown')) # Use intent or generic tag
-                processed_training_data_log.append({
-                    'input_text': input_text,
-                    'normalized_text': normalize_text(input_text),
-                    'output': output_text,
-                    'intent': intervention.get('intent', 'crisis_intervention_unknown'),
-                    'sentiment': analyze_sentiment_train(input_text),
-                    'entities': extract_kenyan_entities(input_text),
-                    'urgency_level': metadata.get('urgency', 'critical'),
-                    'language_mix': detect_language_mix(input_text),
-                    'source_file': 'training_data.yml'
-                })
+        # localized_content
+        for content_item in training_samples_data.get('localized_content', []):
+            add_training_data(content_item.get('input'), content_item.get('intent'), content_item.get('output'), training_data_file_path, content_item.get('metadata', {}))
         
-        # Add training_cautions (negative examples) from training_data.yml
-        for caution in training_cautions:
-            input_text = caution.get('input')
-            preferred_response = caution.get('preferred_response')
-            if input_text and preferred_response:
-                X.append(normalize_text(input_text))
-                y.append('user_input_caution') # Give a specific intent for these
-                processed_training_data_log.append({
-                    'input_text': input_text,
-                    'normalized_text': normalize_text(input_text),
-                    'output': preferred_response,
-                    'intent': 'user_input_caution',
-                    'sentiment': analyze_sentiment_train(input_text),
-                    'entities': extract_kenyan_entities(input_text),
-                    'urgency_level': 'low', # These are training notes, not crisis
-                    'language_mix': detect_language_mix(input_text),
-                    'source_file': 'training_data.yml'
-                })
+        # crisis_interventions (from training_data.yml)
+        for intervention in training_samples_data.get('crisis_interventions', []):
+            add_training_data(intervention.get('input'), intervention.get('intent'), intervention.get('output'), training_data_file_path, intervention.get('metadata', {}))
+        
+        # training_cautions (negative examples for logging, not classification input)
+        for caution in training_samples_data.get('training_cautions', []):
+            add_training_data(caution.get('input'), 'user_input_caution', caution.get('preferred_response', ''), training_data_file_path)
+
+
+    # --- 3. Process additional patterns/responses from other YAMLs (for logging completeness) ---
+    # These often contain responses that aren't direct intent patterns but are good for logging.
+
+    # Coping Strategies - interactive_responses
+    if coping_strategies_data and 'interactive_responses' in coping_strategies_data:
+        for item in coping_strategies_data['interactive_responses']:
+            if 'trigger' in item and 'response' in item:
+                # Use a specific intent for these, or create one like 'coping_response_trigger'
+                add_training_data(item['trigger'], 'seek_coping_strategies', item['response'], coping_strategies_file_path, item.get('metadata', {}))
+
+    # Crisis Support - response_protocols (scripts for actual bot output, not new intent patterns)
+    if crisis_data and 'response_protocols' in crisis_data:
+        for protocol_name, protocol_data in crisis_data['response_protocols'].items():
+            if 'triggers' in protocol_data and 'script' in protocol_data:
+                example_script = random.choice(protocol_data['script']) if protocol_data['script'] else "No script defined."
+                for trigger in protocol_data['triggers']:
+                    add_training_data(trigger, f'crisis_{protocol_name}', example_script, crisis_support_file_path, protocol_data.get('metadata', {}))
+
+    # Empathy and Feelings - emotional_states
+    if empathy_data and 'emotional_states' in empathy_data:
+        for state_name, state_data in empathy_data['emotional_states'].items():
+            if 'triggers' in state_data and 'responses' in state_data:
+                example_response = random.choice(state_data['responses']) if state_data['responses'] else "No response defined."
+                for trigger in state_data['triggers']:
+                    add_training_data(trigger, f'empathy_{state_name}', example_response, empathy_and_feelings_file_path, state_data.get('metadata', {}))
+            if 'cultural_emotions' in empathy_data:
+                 for state_name, state_data in empathy_data['cultural_emotions'].items():
+                     if 'triggers' in state_data and 'responses' in state_data:
+                         example_response = random.choice(state_data['responses']) if state_data['responses'] else "No response defined."
+                         for trigger in state_data['triggers']:
+                             add_training_data(trigger, f'cultural_empathy_{state_name}', example_response, empathy_and_feelings_file_path, state_data.get('metadata', {}))
+
+
+    # Affirmations - core_affirmations and contextual_affirmations (patterns are implicit, use main intent)
+    if affirmations_data:
+        if 'core_affirmations' in affirmations_data:
+            for cat_name, cat_data in affirmations_data['core_affirmations'].items():
+                if 'list' in cat_data:
+                    for item in cat_data['list']:
+                        # Affirmations are responses, but their request triggers an intent
+                        # We are assuming 'seek_affirmation' intent covers these.
+                        # Adding examples like "Give me an affirmation on {cat_name}" as patterns.
+                        if cat_name == 'self_worth':
+                            add_training_data(f"Give me an affirmation on self-worth", 'seek_affirmation', item.get('text'), affirmations_file_path)
+                        elif cat_name == 'resilience':
+                            add_training_data(f"Give me an affirmation on resilience", 'seek_affirmation', item.get('text'), affirmations_file_path)
+                        elif cat_name == 'community':
+                            add_training_data(f"Give me an affirmation on community", 'seek_affirmation', item.get('text'), affirmations_file_path)
+
+        if 'contextual_affirmations' in affirmations_data:
+            for cat_name, cat_data in affirmations_data['contextual_affirmations'].items():
+                if 'list' in cat_data:
+                    for item in cat_data['list']:
+                        # These are handled by seek_contextual_affirmation intent
+                        # No need to add patterns here as intents.yml already handles.
+                        pass
+
+
+    # Resources and Crisis - mythbusters (myth is input, fact is response)
+    if resources_data and 'mythbusters' in resources_data:
+        if 'myths' in resources_data['mythbusters'] and isinstance(resources_data['mythbusters']['myths'], list):
+            for item in resources_data['mythbusters']['myths']:
+                if 'myth' in item and 'fact' in item:
+                    add_training_data(item['myth'], 'address_stigma/myth', item['fact'], resources_and_crisis_file_path)
+    
+    # Greetings - specific time-based/cultural greetings (for logging)
+    if greetings_data:
+        if 'cultural_greetings' in greetings_data:
+            for lang_cat, entries in greetings_data['cultural_greetings'].items():
+                if isinstance(entries, dict):
+                    for sub_cat, patterns in entries.items():
+                        for pattern in patterns:
+                            add_training_data(pattern, 'greeting', f"Hello ({lang_cat}, {sub_cat})", greetings_file_path)
+                elif isinstance(entries, list): # Sheng direct list
+                    for pattern in entries:
+                        add_training_data(pattern, 'greeting', f"Hello ({lang_cat})", greetings_file_path)
+        if 'time_sensitive' in greetings_data:
+            for time_cat, patterns in greetings_data['time_sensitive'].items():
+                for pattern in patterns:
+                    add_training_data(pattern, 'greeting', f"Good {time_cat}", greetings_file_path)
+
+
+    if not X:
+        logger.error("No training data loaded. Check YAML files.")
+        return [], [], []
 
     return X, y, processed_training_data_log
 
