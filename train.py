@@ -1,3 +1,4 @@
+```python
 import yaml
 import os
 import logging
@@ -11,9 +12,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import numpy as np 
 import random 
-from textblob import TextBlob # Added for sentiment analysis consistency in train.py
-import nltk # Added for TextBlob dependency
-import re # For regex in normalization and entity extraction
+from textblob import TextBlob 
+import nltk 
+import re 
 
 # --- Configuration and Setup ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,7 +31,6 @@ os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(MODELS_DIR, exist_ok=True)
 
 # --- NLTK Downloads (for TextBlob in train.py) ---
-# Ensure these are downloaded when train.py runs, to prepare environment
 try:
     nltk.data.find('tokenizers/punkt')
 except nltk.downloader.DownloadError:
@@ -40,7 +40,7 @@ try:
 except nltk.downloader.DownloadError:
     nltk.download('stopwords', quiet=True)
 try:
-    nltk.data.find('taggers/averaged_perceptron_tagger') # Needed for pos_tag
+    nltk.data.find('taggers/averaged_perceptron_tagger') 
 except nltk.downloader.DownloadError:
     nltk.download('averaged_perceptron_tagger', quiet=True)
 
@@ -129,13 +129,11 @@ def analyze_sentiment_train(text):
 
 def normalize_text(text):
     """Enhanced text normalization for Kenyan English, Swahili, and Sheng."""
-    # Ensure this is consistent with how the app's classifier preprocesses text if any
-    # (Currently, app.py uses simple lower().strip() before passing to model)
     text = text.lower()
     text = re.sub(r'[^\w\s\'\-]', '', text)  
     tokens = nltk.word_tokenize(text) 
-    # Use global stop_words defined at top
-    tokens = [word for word in tokens if word not in stop_words and len(word) > 1] 
+    stop_words_local = set(stopwords.words('english')).union(kenyan_stopwords) # Ensure stop_words is local or re-defined if needed
+    tokens = [word for word in tokens if word not in stop_words_local and len(word) > 1] 
     return ' '.join(tokens)
 
 def detect_language_mix(text):
@@ -187,15 +185,14 @@ def extract_kenyan_entities(text):
 def load_and_prepare_data():
     """Loads data from all YAML files and prepares it for training."""
     
-    # Paths for all YAMLs that contribute training data
     intents_file_path = INTENTS_FILE
     training_data_file_path = TRAINING_DATA_FILE
-    coping_strategies_file_path = COPING_STRATEGIES_FILE
-    empathy_and_feelings_file_path = EMPATHY_AND_FEELINGS_FILE
-    crisis_support_file_path = CRISIS_SUPPORT_FILE
-    affirmations_file_path = AFFIRMATIONS_FILE
-    resources_and_crisis_file_path = RESOURCES_AND_CRISIS_FILE # For mythbusters, etc.
-    greetings_file_path = GREETINGS_FILE # For greeting patterns
+    coping_strategies_file_path = os.path.join(DATA_DIR, 'coping_strategies.yml') 
+    empathy_and_feelings_file_path = os.path.join(DATA_DIR, 'empathy_and_feelings.yml')
+    crisis_support_file_path = os.path.join(DATA_DIR, 'crisis_support.yml')
+    affirmations_file_path = os.path.join(DATA_DIR, 'affirmations.yml')
+    resources_and_crisis_file_path = os.path.join(DATA_DIR, 'resources_and_crisis.yml') 
+    greetings_file_path = os.path.join(DATA_DIR, 'greetings.yml') 
 
 
     # Load all YAML files
@@ -213,7 +210,6 @@ def load_and_prepare_data():
     y = [] 
     processed_training_data_log = [] 
 
-    # Helper function to add data to X, y, and log
     def add_training_data(input_text, intent_tag, response_output, source_file, metadata=None):
         if not input_text or not intent_tag:
             return
@@ -224,7 +220,7 @@ def load_and_prepare_data():
         sentiment_val = analyze_sentiment_train(input_text)
         entities_val = extract_kenyan_entities(input_text)
         language_mix_val = detect_language_mix(input_text)
-        urgency_val = metadata.get('risk_level', 'low') if metadata else 'low'
+        urgency_val = metadata.get('risk_level', 'low') if metadata and 'risk_level' in metadata else (metadata.get('urgency', 'low') if metadata and 'urgency' in metadata else 'low')
         
         processed_training_data_log.append({
             'input_text': input_text,
@@ -254,20 +250,35 @@ def load_and_prepare_data():
     if training_samples_data:
         # conversation_samples
         for sample in training_samples_data.get('conversation_samples', []):
-            add_training_data(sample.get('input'), sample.get('intent'), sample.get('output'), training_data_file_path, sample.get('metadata', {}))
+            input_text = sample.get('input')
+            output_text = sample.get('output')
+            metadata = sample.get('metadata', {})
+            sample_intent = sample.get('intent') or (metadata.get('tags', ["unknown_intent"])[0] if metadata.get('tags') else "unknown_intent")
+            add_training_data(input_text, sample_intent, output_text, training_data_file_path, metadata)
         
         # special_cases
         for case_type, cases in training_samples_data.get('special_cases', {}).items():
             for case in cases:
-                add_training_data(case.get('input'), case.get('intent', case_type), case.get('output'), training_data_file_path, case.get('metadata', {}))
+                input_text = case.get('input')
+                output_text = case.get('output')
+                metadata = case.get('metadata', {})
+                case_intent = case.get('intent') or case_type
+                add_training_data(input_text, case_intent, output_text, training_data_file_path, metadata)
         
         # localized_content
         for content_item in training_samples_data.get('localized_content', []):
-            add_training_data(content_item.get('input'), content_item.get('intent'), content_item.get('output'), training_data_file_path, content_item.get('metadata', {}))
+            input_text = content_item.get('input')
+            output_text = content_item.get('output')
+            metadata = content_item.get('metadata', {})
+            content_intent = content_item.get('intent') or (metadata.get('tag') or 'localized_content')
+            add_training_data(input_text, content_intent, output_text, training_data_file_path, metadata)
         
         # crisis_interventions (from training_data.yml)
         for intervention in training_samples_data.get('crisis_interventions', []):
-            add_training_data(intervention.get('input'), intervention.get('intent'), intervention.get('output'), training_data_file_path, intervention.get('metadata', {}))
+            input_text = intervention.get('input')
+            output_text = intervention.get('output')
+            metadata = intervention.get('metadata', {})
+            add_training_data(input_text, intervention.get('intent', 'crisis_intervention_unknown'), output_text, training_data_file_path, metadata)
         
         # training_cautions (negative examples for logging, not classification input)
         for caution in training_samples_data.get('training_cautions', []):
@@ -275,90 +286,68 @@ def load_and_prepare_data():
 
 
     # --- 3. Process additional patterns/responses from other YAMLs (for logging completeness) ---
-    # These often contain responses that aren't direct intent patterns but are good for logging.
+    # These sections also contain valuable patterns and responses for logging.
 
-    # Coping Strategies - interactive_responses
-    if coping_strategies_data and 'interactive_responses' in coping_strategies_data:
-        for item in coping_strategies_data['interactive_responses']:
-            if 'trigger' in item and 'response' in item:
-                # Use a specific intent for these, or create one like 'coping_response_trigger'
-                add_training_data(item['trigger'], 'seek_coping_strategies', item['response'], coping_strategies_file_path, item.get('metadata', {}))
+    # Coping Strategies - all sub-sections with names/tips/etc.
+    if coping_strategies_data:
+        coping_detail_map = coping_strategies_data # Use directly
+        
+        for category in ['core_strategies', 'cultural_strategies', 'by_scenario']:
+            if category in coping_detail_map:
+                for sub_cat_name, sub_cat_content in coping_detail_map[category].items():
+                    if 'techniques' in sub_cat_content and isinstance(sub_cat_content['techniques'], list):
+                        for tech in sub_cat_content['techniques']:
+                            add_training_data(tech.get('name'), f'coping_tech_{sub_cat_name}', tech.get('how_to_guide', [''])[0], coping_strategies_file_path, tech.get('metadata', {}))
+                    if 'methods' in sub_cat_content and isinstance(sub_cat_content['methods'], list):
+                        for method in sub_cat_content['methods']:
+                            add_training_data(method.get('name'), f'coping_method_{sub_cat_name}', method.get('how_to', ''), coping_strategies_file_path, method.get('metadata', {}))
+                    if 'strategies' in sub_cat_content and isinstance(sub_cat_content['strategies'], list): # For by_scenario
+                         for strategy in sub_cat_content['strategies']:
+                             add_training_data(strategy.get('tip'), f'coping_scenario_{sub_cat_name}', strategy.get('how_to', ''), coping_strategies_file_path, strategy.get('metadata', {}))
 
-    # Crisis Support - response_protocols (scripts for actual bot output, not new intent patterns)
-    if crisis_data and 'response_protocols' in crisis_data:
-        for protocol_name, protocol_data in crisis_data['response_protocols'].items():
-            if 'triggers' in protocol_data and 'script' in protocol_data:
-                example_script = random.choice(protocol_data['script']) if protocol_data['script'] else "No script defined."
-                for trigger in protocol_data['triggers']:
-                    add_training_data(trigger, f'crisis_{protocol_name}', example_script, crisis_support_file_path, protocol_data.get('metadata', {}))
+        for top_level_list in ['movement_based', 'creative_outlets', 'immediate_support_tips', 'safety_planning_preventive']:
+            if top_level_list in coping_detail_map and isinstance(coping_detail_map[top_level_list], list):
+                for item in coping_detail_map[top_level_list]:
+                    add_training_data(item.get('name') or item.get('tip'), f'coping_general_{top_level_list}', item.get('description') or item.get('how_to') or item.get('benefits', [])[0] if isinstance(item.get('benefits'),list) else item.get('benefits'), coping_strategies_file_path, item.get('metadata', {}))
+            elif top_level_list in coping_detail_map and isinstance(coping_detail_map[top_level_list], dict) and 'tips' in coping_detail_map[top_level_list] and isinstance(coping_detail_map[top_level_list]['tips'], list):
+                 for item in coping_detail_map[top_level_list]['tips']:
+                     add_training_data(item.get('name') or item.get('tip'), f'coping_general_{top_level_list}', item.get('how_to'), coping_strategies_file_path, item.get('metadata', {}))
 
-    # Empathy and Feelings - emotional_states
-    if empathy_data and 'emotional_states' in empathy_data:
-        for state_name, state_data in empathy_data['emotional_states'].items():
+    # Empathy and Feelings - cultural_emotions (triggers and responses)
+    if empathy_data and 'cultural_emotions' in empathy_data:
+        for state_name, state_data in empathy_data['cultural_emotions'].items():
             if 'triggers' in state_data and 'responses' in state_data:
                 example_response = random.choice(state_data['responses']) if state_data['responses'] else "No response defined."
                 for trigger in state_data['triggers']:
-                    add_training_data(trigger, f'empathy_{state_name}', example_response, empathy_and_feelings_file_path, state_data.get('metadata', {}))
-            if 'cultural_emotions' in empathy_data:
-                 for state_name, state_data in empathy_data['cultural_emotions'].items():
-                     if 'triggers' in state_data and 'responses' in state_data:
-                         example_response = random.choice(state_data['responses']) if state_data['responses'] else "No response defined."
-                         for trigger in state_data['triggers']:
-                             add_training_data(trigger, f'cultural_empathy_{state_name}', example_response, empathy_and_feelings_file_path, state_data.get('metadata', {}))
+                    add_training_data(trigger, f'cultural_emotion_{state_name}', example_response, empathy_and_feelings_file_path, state_data.get('metadata', {}))
 
-
-    # Affirmations - core_affirmations and contextual_affirmations (patterns are implicit, use main intent)
+    # Affirmations - core_affirmations and contextual_affirmations
     if affirmations_data:
-        if 'core_affirmations' in affirmations_data:
-            for cat_name, cat_data in affirmations_data['core_affirmations'].items():
-                if 'list' in cat_data:
-                    for item in cat_data['list']:
-                        # Affirmations are responses, but their request triggers an intent
-                        # We are assuming 'seek_affirmation' intent covers these.
-                        # Adding examples like "Give me an affirmation on {cat_name}" as patterns.
-                        if cat_name == 'self_worth':
-                            add_training_data(f"Give me an affirmation on self-worth", 'seek_affirmation', item.get('text'), affirmations_file_path)
-                        elif cat_name == 'resilience':
-                            add_training_data(f"Give me an affirmation on resilience", 'seek_affirmation', item.get('text'), affirmations_file_path)
-                        elif cat_name == 'community':
-                            add_training_data(f"Give me an affirmation on community", 'seek_affirmation', item.get('text'), affirmations_file_path)
+        for cat_type in ['core_affirmations', 'contextual_affirmations']:
+            if cat_type in affirmations_data:
+                for cat_name, cat_data in affirmations_data[cat_type].items():
+                    if 'list' in cat_data and isinstance(cat_data['list'], list):
+                        for item in cat_data['list']:
+                            # Using the affirmation text itself as input for logging
+                            add_training_data(item.get('text'), f'affirmation_{cat_name}', item.get('meaning'), affirmations_file_path)
 
-        if 'contextual_affirmations' in affirmations_data:
-            for cat_name, cat_data in affirmations_data['contextual_affirmations'].items():
-                if 'list' in cat_data:
-                    for item in cat_data['list']:
-                        # These are handled by seek_contextual_affirmation intent
-                        # No need to add patterns here as intents.yml already handles.
-                        pass
+    # Resources and Crisis - mythbusters
+    if resources_data and 'mythbusters' in resources_data and 'myths' in resources_data['mythbusters'] and isinstance(resources_data['mythbusters']['myths'], list):
+        for item in resources_data['mythbusters']['myths']:
+            if 'myth' in item and 'fact' in item:
+                add_training_data(item['myth'], 'mythbusters_question', item['fact'], resources_and_crisis_file_path)
 
-
-    # Resources and Crisis - mythbusters (myth is input, fact is response)
-    if resources_data and 'mythbusters' in resources_data:
-        if 'myths' in resources_data['mythbusters'] and isinstance(resources_data['mythbusters']['myths'], list):
-            for item in resources_data['mythbusters']['myths']:
-                if 'myth' in item and 'fact' in item:
-                    add_training_data(item['myth'], 'address_stigma/myth', item['fact'], resources_and_crisis_file_path)
-    
-    # Greetings - specific time-based/cultural greetings (for logging)
-    if greetings_data:
-        if 'cultural_greetings' in greetings_data:
-            for lang_cat, entries in greetings_data['cultural_greetings'].items():
-                if isinstance(entries, dict):
-                    for sub_cat, patterns in entries.items():
-                        for pattern in patterns:
-                            add_training_data(pattern, 'greeting', f"Hello ({lang_cat}, {sub_cat})", greetings_file_path)
-                elif isinstance(entries, list): # Sheng direct list
-                    for pattern in entries:
-                        add_training_data(pattern, 'greeting', f"Hello ({lang_cat})", greetings_file_path)
-        if 'time_sensitive' in greetings_data:
-            for time_cat, patterns in greetings_data['time_sensitive'].items():
-                for pattern in patterns:
-                    add_training_data(pattern, 'greeting', f"Good {time_cat}", greetings_file_path)
-
-
-    if not X:
-        logger.error("No training data loaded. Check YAML files.")
-        return [], [], []
+    # Crisis Support - kenya_emergency_services, targeted_resources (for logging info)
+    if crisis_data:
+        for category in ['kenya_emergency_services', 'targeted_resources']:
+            if category in crisis_data and isinstance(crisis_data[category], dict):
+                for sub_category, entries in crisis_data[category].items():
+                    if isinstance(entries, list):
+                        for entry in entries:
+                            if 'name' in entry and 'contact' in entry:
+                                # Log names/contacts as patterns for information retrieval
+                                add_training_data(entry['name'], f'{category}_info', f"Contact: {entry['contact']}", crisis_support_file_path)
+                                add_training_data(f"Contact for {entry['name']}", f'{category}_info', f"Contact: {entry['contact']}", crisis_support_file_path)
 
     return X, y, processed_training_data_log
 
@@ -397,9 +386,6 @@ def train_model(X, y):
         logger.info(f"\nClassification Report:\n{report}")
     else:
         logger.warning("No valid labels in test set for classification report. Skipping report generation.")
-        logger.info(f"y_test was: {y_test}")
-        logger.info(f"unique_y_test was: {unique_y_test}")
-        logger.info(f"label_encoder.classes_ length: {len(label_encoder.classes_)}")
     
     return pipeline, label_encoder 
 
