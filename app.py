@@ -37,7 +37,7 @@ ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "")
 os.makedirs(DATA_DIR, exist_ok=True) 
 os.makedirs(MODELS_DIR, exist_ok=True) 
 
-# Point NLTK to the custom data directory (must be before any TextBlob/NLTK usage)
+# Point NLTK to the custom data directory
 NLTK_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', 'nltk_data')
 if NLTK_DATA_DIR not in nltk.data.path:
     nltk.data.path.append(NLTK_DATA_DIR)
@@ -64,7 +64,7 @@ CLASSIFIER_MODEL = None
 LABEL_ENCODER = None 
 
 @st.cache_data(show_spinner="Loading AI knowledge base...")
-def load_yaml_cached(filepath):
+def load_yaml_cached(filepath): 
     """Loads a YAML file from the specified path, designed for caching."""
     try:
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -79,7 +79,7 @@ def load_yaml_cached(filepath):
 @st.cache_resource(show_spinner="Loading all bot resources...")
 def load_all_resources_cached():
     """Loads all YAML resource files into GLOBAL_RESOURCES."""
-    
+
     resources_dict = {} 
 
     # Load Intents - Store as a dictionary for easy lookup by tag
@@ -102,7 +102,7 @@ def load_all_resources_cached():
 
     # Load Coping Strategies (full detail needed for selection logic)
     resources_dict['coping_strategies_detail'] = load_yaml_cached(COPING_STRATEGIES_FILE)
-    
+
     # Load Crisis Support
     crisis_data = load_yaml_cached(CRISIS_SUPPORT_FILE)
     if crisis_data:
@@ -148,7 +148,7 @@ def load_all_resources_cached():
         resources_dict['emotional_openers_responses'] = {}
 
     resources_dict['greetings_patterns'] = all_greetings_patterns 
-    
+
     # Load Affirmations
     affirmations_data = load_yaml_cached(AFFIRMATIONS_FILE)
     if affirmations_data:
@@ -176,7 +176,7 @@ def load_all_resources_cached():
     # Load User Feedback configuration
     user_feedback_data = load_yaml_cached(USER_FEEDBACK_FILE)
     resources_dict['user_feedback_config'] = user_feedback_data.get('feedback_channels', {}) if user_feedback_data else {}
-    
+
     # Load Fallbacks
     fallbacks_data = load_yaml_cached(FALLBACKS_FILE)
     if fallbacks_data:
@@ -214,7 +214,7 @@ def load_classifier_model_cached():
         logger.error(f"Label Encoder file not found at {label_encoder_path}. Please run train.py first.")
     except Exception as e:
         logger.error(f"Error loading Label Encoder: {e}")
-    
+
     return classifier_model, label_encoder
 
 # --- Database Functions (for users.db) ---
@@ -297,7 +297,7 @@ def init_user_db_cached():
             INSERT OR IGNORE INTO pricing (id, plan_name, max_conversations, price, currency) VALUES 
             (3, 'Unlimited', NULL, 2000, 'Ksh');
         """)
-        
+
         cursor.execute("SELECT id FROM users WHERE id = ?", (ADMIN_EMAIL,)) 
         if not cursor.fetchone():
             cursor.execute(
@@ -305,7 +305,7 @@ def init_user_db_cached():
                 (ADMIN_EMAIL, "Admin", ADMIN_EMAIL, ADMIN_PASSWORD_HASH, None) 
             )
             logger.info("Default admin user created.")
-        
+
         conn.commit()
     logger.info("User database initialized successfully.")
 
@@ -362,7 +362,7 @@ def register_user(username, email, password, plan_id):
 
 def login_user(user_or_email, password):
     user_or_email_clean = user_or_email.strip().lower()
-    
+
     if user_or_email_clean == ADMIN_EMAIL.lower():
         if check_pw(password, ADMIN_PASSWORD_HASH):
             st.session_state.update({
@@ -372,7 +372,7 @@ def login_user(user_or_email, password):
             })
             return True, "Admin login successful."
         return False, "Wrong admin password."
-    
+
     try:
         with sqlite3.connect(USERS_DB_PATH) as conn:
             c = conn.cursor()
@@ -381,7 +381,7 @@ def login_user(user_or_email, password):
                 (user_or_email_clean, user_or_email_clean)
             )
             row = c.fetchone()
-            
+
             if row and check_pw(password, row[3]):
                 st.session_state.update({
                     "logged_in": True,
@@ -408,7 +408,7 @@ def has_exceeded_usage(user_id):
             WHERE u.id = ?
         """, (user_id,))
         result = c.fetchone()
-        
+
         if not result:
             logger.warning(f"User {user_id} not found for usage check.")
             return True 
@@ -424,7 +424,7 @@ def has_exceeded_usage(user_id):
 
         if max_convos is None: 
             return False
-        
+
         c.execute("SELECT COUNT(*) FROM conversations WHERE user_id = ?", (user_id,))
         current_convos = c.fetchone()[0]
         return current_convos >= max_convos
@@ -444,7 +444,7 @@ def start_conversation_in_db(user_id):
         except sqlite3.Error as e:
             logger.error(f"Error creating anonymous user in DB: {e}")
             return None 
-    
+
     conversation_id = str(uuid.uuid4())
     try:
         with sqlite3.connect(USERS_DB_PATH) as conn:
@@ -469,19 +469,19 @@ def analyze_sentiment(text):
     try:
         analysis = TextBlob(text)
         polarity = analysis.sentiment.polarity
-        
+
         kenyan_positive_words = {"poa", "safi", "fitii", "mzima", "nzuri", "fresh", "radhi", "fiti", "nzuri", "barikiwa", "shukran", "good", "great", "excellent", "happy", "joy", "positive", "wonderful", "amazing"}
         kenyan_negative_words = {"pole", "sad", "huzuni", "mbaya", "stress", "pressure", "kufa", "shida", "majuto", "not okay", "depressed", "afraid", "low", "worthless", "hopeless", "terrible", "awful", "bad", "maisha ni ngumu", "nimechoka", "broken", "unhappy", "miserable", "pain", "hurt", "grieving", "loss", "dumped", "failed"}
-        
+
         text_lower = text.lower()
-        
+
         if any(word in text_lower for word in kenyan_negative_words):
             polarity = max(-1.0, polarity - 0.2) 
         elif any(word in text_lower for word in kenyan_positive_words):
             polarity = min(1.0, polarity + 0.2) 
-            
+
         return max(-1.0, min(1.0, float(polarity))) 
-    
+
     except Exception as e:
         logger.error(f"Error in analyze_sentiment with TextBlob: {e}")
         text_lower = text.lower()
@@ -495,7 +495,7 @@ def analyze_sentiment(text):
 def get_random_coping_strategy_detail(strategy_type=None):
     """Retrieves a random coping strategy detail from the loaded YAML, optionally by type."""
     coping_detail = GLOBAL_RESOURCES.get('coping_strategies_detail', {})
-    
+
     all_strategies_flat = []
 
     def add_strategies_from_nested(category_data, list_key=None, source_label=None):
@@ -527,7 +527,7 @@ def get_random_coping_strategy_detail(strategy_type=None):
     if 'cultural_strategies' in coping_detail:
         for cat_name, cat_data in coping_detail['cultural_strategies'].items():
             add_strategies_from_nested(cat_data, 'methods', cat_name) 
-    
+
     # Situation-Specific (by_scenario)
     if 'by_scenario' in coping_detail and isinstance(coping_detail['by_scenario'], list):
         for scenario in coping_detail['by_scenario']:
@@ -536,7 +536,7 @@ def get_random_coping_strategy_detail(strategy_type=None):
     # Other top-level lists/dicts
     add_strategies_from_nested(coping_detail.get('movement_based'), None, 'movement_based')
     add_strategies_from_nested(coping_detail.get('creative_outlets'), None, 'creative_outlets')
-    
+
     # For digital_tools, need to go deeper
     if 'digital_tools' in coping_detail and coping_detail['digital_tools'] and 'app_recommendations' in coping_detail['digital_tools']:
         for app_type, app_list in coping_detail['digital_tools']['app_recommendations'].items():
@@ -546,7 +546,7 @@ def get_random_coping_strategy_detail(strategy_type=None):
                         app_copy = app_item.copy()
                         app_copy['source_type'] = f'digital_app_{app_type}'
                         all_strategies_flat.append(app_copy)
-    
+
     # For immediate_support_tips
     if 'immediate_support_tips' in coping_detail and coping_detail['immediate_support_tips'] and 'tips' in coping_detail['immediate_support_tips']:
         add_strategies_from_nested(coping_detail['immediate_support_tips'], 'tips', 'immediate_support_tips')
@@ -565,7 +565,7 @@ def get_random_coping_strategy_detail(strategy_type=None):
                                ]
         if filtered_strategies:
             return random.choice(filtered_strategies)
-    
+
     if all_strategies_flat:
         return random.choice(all_strategies_flat)
     return None
@@ -574,7 +574,7 @@ def get_random_affirmation_detail(affirmation_type=None):
     """Retrieves a random affirmation detail from the loaded YAML, optionally by type."""
     core_affirmations = GLOBAL_RESOURCES.get('affirmations_core', {})
     contextual_affirmations = GLOBAL_RESOURCES.get('affirmations_contextual', {})
-    
+
     target_list = []
 
     def add_affirmations_from_category(category_dict, source_type):
@@ -635,16 +635,16 @@ def find_response(user_input):
 
     if predicted_intent in critical_crisis_intents and confidence > 0.25: # Safety threshold
         intent_data = GLOBAL_RESOURCES.get('intents', {}).get(predicted_intent) 
-        
+
         if intent_data:
             responses = intent_data.get('responses', [])
             follow_up_questions = intent_data.get('follow_up', [])
-            
+
             if responses:
                 bot_response = f"🚨 {random.choice(responses)}"
                 if follow_up_questions:
                     bot_response += f" {random.choice(follow_up_questions)}"
-                
+
                 st.session_state.last_bot_message_type = predicted_intent
                 st.session_state.expected_next_action = None 
                 logger.info(f"Responded based on HIGH PRIORITY crisis intent: {predicted_intent}")
@@ -656,10 +656,10 @@ def find_response(user_input):
     is_affirmative_keyword_present = ("yes" in user_input_lower or "sure" in user_input_lower or "okay" in user_input_lower or "yup" in user_input_lower or "ndiyo" in user_input_lower or "na'am" in user_input_lower or "sawa" in user_input_lower)
 
     if (predicted_intent == 'affirmative_response' and confidence > 0.5) or \
-       (is_affirmative_keyword_present and st.session_state.get('expected_next_action')): 
-        
+    (is_affirmative_keyword_present and st.session_state.get('expected_next_action')): 
+
         response_given = False
-        
+
         if st.session_state.get('expected_next_action') == 'ask_coping_strategy_choice':
             selected_strategy = get_random_coping_strategy_detail() 
             if selected_strategy:
@@ -673,7 +673,7 @@ def find_response(user_input):
                     bot_response += f" {random.choice(selected_strategy['follow_up_questions'])}"
                 else:
                     bot_response += " How does that sound? Did it help you feel a little better?"
-                        
+
                 st.session_state.last_bot_message_type = 'delivered_coping_strategy'
                 response_given = True
                 logger.info("Responded: Contextual Affirmative for Coping Strategy.")
@@ -688,7 +688,7 @@ def find_response(user_input):
                 bot_response = f"Wonderful! Here’s a positive affirmation for you: '{selected_affirmation.get('text', 'No affirmation found.')}'"
                 if selected_affirmation.get('meaning'):
                     bot_response += f" Meaning: {selected_affirmation['meaning']}."
-                
+
                 affirmation_category_tag = selected_affirmation.get('type') 
                 category_details = GLOBAL_RESOURCES.get('affirmations_core', {}).get(affirmation_category_tag) or \
                                    GLOBAL_RESOURCES.get('affirmations_contextual', {}).get(affirmation_category_tag)
@@ -696,7 +696,7 @@ def find_response(user_input):
                      bot_response += f" {random.choice(category_details['reflection_questions'])}"
                 else:
                      bot_response += " How does that resonate with you today?"
-                
+
                 st.session_state.last_bot_message_type = 'delivered_affirmation'
                 response_given = True
                 logger.info("Responded: Contextual Affirmative for Affirmation.")
@@ -706,23 +706,23 @@ def find_response(user_input):
                 logger.warning("No affirmation found for affirmative_response context.")
 
         elif st.session_state.expected_next_action == 'ask_resource_choice':
-             therapy_resources_kenya = GLOBAL_RESOURCES.get('therapy_resources', {}).get('kenya', [])
-             if therapy_resources_kenya:
-                 selected_resource = random.choice(therapy_resources_kenya)
-                 bot_response = f"Okay, here's a professional resource: **{selected_resource.get('name')}**. They offer {selected_resource.get('services', 'various services')}. Contact: {selected_resource.get('contact', 'N/A')}."
-                 if selected_resource.get('follow_up_questions'):
-                     bot_response += f" {random.choice(selected_resource['follow_up_questions'])}"
-                 else:
-                     bot_response += " Would you like to know more about this resource?"
-                 
-                 st.session_state.last_bot_message_type = 'delivered_resource'
-                 response_given = True
-                 logger.info("Responded: Contextual Affirmative for Resources.")
-                 log_message(st.session_state.conversation_id, "bot", bot_response, predicted_intent, confidence, None, "affirmative_resource")
-                 return bot_response
-             else:
-                 logger.warning("No resources found for affirmative_response context.")
-        
+            therapy_resources_kenya = GLOBAL_RESOURCES.get('therapy_resources', {}).get('kenya', [])
+            if therapy_resources_kenya:
+                selected_resource = random.choice(therapy_resources_kenya)
+                bot_response = f"Okay, here's a professional resource: **{selected_resource.get('name')}**. They offer {selected_resource.get('services', 'various services')}. Contact: {selected_resource.get('contact', 'N/A')}."
+                if selected_resource.get('follow_up_questions'):
+                    bot_response += f" {random.choice(selected_resource['follow_up_questions'])}"
+                else:
+                    bot_response += " Would you like to know more about this resource?"
+
+                st.session_state.last_bot_message_type = 'delivered_resource'
+                response_given = True
+                logger.info("Responded: Contextual Affirmative for Resources.")
+                log_message(st.session_state.conversation_id, "bot", bot_response, predicted_intent, confidence, None, "affirmative_resource")
+                return bot_response
+            else:
+                logger.warning("No resources found for affirmative_response context.")
+
         if response_given: 
             st.session_state.expected_next_action = None
         else: 
@@ -733,13 +733,13 @@ def find_response(user_input):
                 bot_response = random.choice(responses)
                 if follow_up_questions:
                     bot_response += f" {random.choice(follow_up_questions)}"
-                
+
                 st.session_state.last_bot_message_type = predicted_intent 
                 st.session_state.expected_next_action = None 
                 logger.info(f"Responded based on general affirmative intent (no specific context): {predicted_intent}")
                 log_message(st.session_state.conversation_id, "bot", bot_response, predicted_intent, confidence, None, "affirmative_general")
                 return bot_response
-            
+
     # --- 4. Direct Emotional Keyword Match (High Priority Fallback for Empathy) ---
     emotional_keywords_map = {
         "not okay": "sadness", "upset": "sadness", "down": "sadness", "terrible": "sadness", "awful": "sadness", "bad": "sadness",
@@ -763,12 +763,12 @@ def find_response(user_input):
         if intent_data:
             responses = intent_data.get('responses', [])
             follow_up_questions = intent_data.get('follow_up', [])
-            
+
             if responses:
                 bot_response = f"💙 {random.choice(responses)}"
                 if follow_up_questions:
                     bot_response += f" {random.choice(follow_up_questions)}"
-                
+
                 st.session_state.last_bot_message_type = matched_emotional_state_by_keyword
                 st.session_state.expected_next_action = None 
                 logger.info(f"Matched: Direct Emotional Keyword Fallback for {matched_emotional_state_by_keyword}")
@@ -778,10 +778,10 @@ def find_response(user_input):
 
     # --- 5. Respond based on Classified Intent (Specific Emotional Intent Threshold) ---
     emotional_intents_classifier = ['sadness', 'anxiety', 'stress', 'anger', 'loneliness', 'express_pain_distress', 'express_stress_anticipation']
-    
+
     if predicted_intent in emotional_intents_classifier and confidence > 0.35: # Emotional classifier threshold
         intent_data = GLOBAL_RESOURCES.get('intents', {}).get(predicted_intent)
-        
+
         if intent_data:
             responses = intent_data.get('responses', [])
             follow_up_questions = intent_data.get('follow_up', [])
@@ -790,14 +790,14 @@ def find_response(user_input):
                 bot_response = random.choice(responses)
                 if follow_up_questions:
                     bot_response += f" {random.choice(follow_up_questions)}"
-                
+
                 st.session_state.last_bot_message_type = predicted_intent 
                 st.session_state.expected_next_action = None 
                 logger.info(f"Responded based on classified emotional intent (threshold): {predicted_intent}")
                 log_message(st.session_state.conversation_id, "bot", bot_response, predicted_intent, confidence, None, "intent_response_emotional_classifier")
                 return bot_response
         logger.warning(f"No responses found for classified emotional intent (threshold): {predicted_intent}")
-        
+
     # --- 6. Respond based on Classified Intent (Standard Threshold for Other Intents) ---
     if predicted_intent and confidence > 0.5: # Standard threshold for general intents
         intent_data = GLOBAL_RESOURCES.get('intents', {}).get(predicted_intent)
@@ -808,7 +808,7 @@ def find_response(user_input):
 
             if responses:
                 bot_response = random.choice(responses)
-                
+
                 # Special handling for intents that offer options, setting expected_next_action
                 if predicted_intent == 'seek_coping_strategies':
                     st.session_state.expected_next_action = 'ask_coping_strategy_choice'
@@ -818,10 +818,10 @@ def find_response(user_input):
                     st.session_state.expected_next_action = 'ask_resource_choice'
                 else:
                     st.session_state.expected_next_action = None 
-                
+
                 if follow_up_questions:
                     bot_response += f" {random.choice(follow_up_questions)}"
-                
+
                 st.session_state.last_bot_message_type = predicted_intent 
                 logger.info(f"Responded based on classified general intent: {predicted_intent}")
                 log_message(st.session_state.conversation_id, "bot", bot_response, predicted_intent, confidence, None, "intent_response_general")
@@ -831,7 +831,7 @@ def find_response(user_input):
     # --- 7. Sentiment analysis fallback (If no specific intent/keyword matched) ---
     sentiment = analyze_sentiment(user_input)
     logger.info(f"Sentiment analysis result: {sentiment}") 
-    
+
     if sentiment < -0.3: 
         sad_openers = GLOBAL_RESOURCES.get('emotional_openers_responses', {}).get('sad', [])
         if sad_openers:
@@ -864,7 +864,7 @@ def find_response(user_input):
             st.session_state.expected_next_action = None 
             log_message(st.session_state.conversation_id, "bot", bot_response, predicted_intent, confidence, sentiment, "sentiment_positive_generic")
             return bot_response
-    
+
     # --- 8. Final fallback if nothing else matches ---
     final_fallbacks = GLOBAL_RESOURCES.get('fallbacks_default', []) 
     if not final_fallbacks: 
@@ -873,7 +873,7 @@ def find_response(user_input):
             "💙 How can I support you today?",
             "💙 Niko hapa kwa ajili yako. (I'm here for you.)"
         ]
-    
+
     bot_response = random.choice(final_fallbacks)
     logger.info("Matched: Final Generic Fallback (from fallbacks.yml or hardcoded)")
     st.session_state.last_bot_message_type = 'generic_fallback'
@@ -895,7 +895,7 @@ def show_landing_page():
     * **Provide Coping Strategies:** Discover practical techniques for managing stress, anxiety, sadness, and more, including culturally relevant approaches.
     * **Offer Affirmations:** Receive positive, uplifting messages grounded in Kenyan values.
     * **Connect to Resources:** Get information on local Kenyan mental health services, hotlines, and community support groups.
-    * **Support in Crisis:** Access immediate guidance and emergency contacts during difficult moments.
+    * **Support in Crisis:** Access immediate guidance and and emergency contacts during difficult moments.
     * **Understand Your Context:** I'm built to recognize and respond to Kenyan idioms, proverbs, and unique life experiences.
 
     Whether you need a listening ear, a quick calming exercise, or a referral to a professional, Kelly AI is here, 24/7.
@@ -912,7 +912,6 @@ def show_chat():
     """Renders the Streamlit chat interface."""
     st.title("💬 Kelly AI - Mental Bot")
 
-    # Display welcome message for anonymous users
     if not st.session_state.logged_in:
         st.info(
             "Welcome! You are currently chatting as an anonymous user. "
@@ -920,12 +919,10 @@ def show_chat():
             "Please **Login** or **Register** in the sidebar to access full features."
         )
 
-    # Display chat messages from history on app rerun
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Accept user input
     if prompt := st.chat_input("What's on your mind?"):
         if has_exceeded_usage(st.session_state.current_user.get('id', 'anonymous_session_init')): 
             st.warning("You've exceeded your conversation limit. Please upgrade your plan or log in.")
@@ -950,7 +947,7 @@ def show_login():
     st.title("🔑 Login")
     user_or_email = st.text_input("Username or Email", key="login_user_email")
     password = st.text_input("Password", type="password", key="login_password")
-    
+
     if st.button("Login", key="login_button"):
         success, message = login_user(user_or_email, password)
         if success:
@@ -971,15 +968,15 @@ def show_register():
     email = st.text_input("Email", key="reg_email")
     password = st.text_input("Password", type="password", key="reg_password")
     confirm = st.text_input("Confirm Password", type="password", key="reg_confirm_password")
-    
+
     with sqlite3.connect(USERS_DB_PATH) as conn: 
         c = conn.cursor()
         c.execute("SELECT id, plan_name FROM pricing") 
         plans = c.fetchall()
-    
+
     plan_options = [p[1] for p in plans if p[1] != 'Unlimited'] 
     selected_plan = st.selectbox("Choose a Plan", plan_options, key="reg_plan_select")
-    
+
     if st.button("Register", key="register_button"):
         if password != confirm:
             st.error("Passwords don't match")
@@ -1018,7 +1015,7 @@ def show_about():
 
     **Core Values:**
     * {', '.join(bot_identity.get('core_values', ['Empathy', 'Confidentiality', 'Cultural Relevance', 'Accessibility', 'Empowerment']))}
-    
+
     **Developed in:** {bot_identity.get('kenyan_identity', {}).get('development_location', 'Nairobi, Kenya')} by {bot_identity.get('creator', 'a dedicated team')}.
     """)
     st.markdown("---")
@@ -1049,7 +1046,7 @@ def show_contact():
         name = st.text_input("Your Name", key="contact_name")
         email = st.text_input("Your Email", key="contact_email")
         message = st.text_area("Your Message", key="contact_message")
-        
+
         if st.form_submit_button("Send Message", key="contact_submit"):
             if name and email and message:
                 with sqlite3.connect(USERS_DB_PATH) as conn: 
@@ -1074,7 +1071,7 @@ def show_pricing():
         c = conn.cursor()
         c.execute("SELECT * FROM pricing")
         plans = c.fetchall()
-    
+
     for plan in plans:
         st.subheader(plan[1])
         st.markdown(f"**Price:** {plan[3]} {plan[4]}")
@@ -1091,7 +1088,7 @@ def show_history():
     if not st.session_state.get("logged_in"):
         st.warning("Please **Login** or **Register** to view your conversation history.")
         return
-    
+
     st.title("🕒 Your Conversation History")
     user_id = st.session_state.current_user.get('id')
     if user_id is None: 
@@ -1107,7 +1104,7 @@ def show_history():
             ORDER BY start_time DESC
         """, (user_id,))
         conversations = c.fetchall()
-    
+
     if not conversations:
         st.info("You don't have any past conversations yet. Start chatting!")
         return
@@ -1126,7 +1123,7 @@ def show_history():
                     ORDER BY timestamp
                 """, (conv_id,))
                 messages = c.fetchall()
-            
+
             for msg_sender, msg_text, msg_timestamp, msg_intent, msg_confidence, msg_sentiment, msg_response_type in messages:
                 sender_label = "You" if msg_sender == "user" else "Kelly AI"
                 with st.chat_message(msg_sender): 
@@ -1153,7 +1150,7 @@ def show_stories():
     with st.expander("Share Your Story", expanded=False): 
         story_title = st.text_input("Title of Your Story", key="story_title_input")
         story_content = st.text_area("Write Your Story Here (max 2000 characters)", key="story_content_input", max_chars=2000)
-        
+
         if st.button("Post My Story", key="post_story_button"):
             if story_title and story_content:
                 if len(story_content) > 2000:
@@ -1172,7 +1169,7 @@ def show_stories():
                     st.rerun()
             else:
                 st.error("Please provide both a title and content for your story.")
-    
+
     st.markdown("---")
     st.subheader("Recent Stories from the Community:")
     with sqlite3.connect(USERS_DB_PATH) as conn: 
@@ -1184,7 +1181,7 @@ def show_stories():
             ORDER BY s.created_at DESC
         """)
         stories = c.fetchall()
-    
+
     if not stories:
         st.info("No community stories yet. Be the first to share your journey!")
         return
@@ -1208,19 +1205,19 @@ def show_admin():
     if not st.session_state.get("is_admin"):
         st.warning("Admin access required")
         return
-    
+
     st.title("👑 Admin Dashboard")
     st.markdown("Manage users, view conversation statistics, and review feedback.")
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["Users", "Conversations & Training Data", "User Feedback", "Manage Plans", "Add Training Data"]) 
-    
+
     with tab1:
         st.subheader("User Management")
         with sqlite3.connect(USERS_DB_PATH) as conn: 
             c = conn.cursor()
             c.execute("SELECT id, username, email, created_at, is_admin, plan_id, plan_expiration_date FROM users")
             users = c.fetchall()
-        
+
         user_data = [{"ID": u[0][:8] + '...', "Username": u[1], "Email": u[2], "Joined": u[3].split(' ')[0], "Admin": bool(u[4]), "Plan ID": u[5], "Plan Expires": u[6] if u[6] else "N/A"} for u in users] 
         st.dataframe(user_data) 
 
@@ -1230,7 +1227,7 @@ def show_admin():
         new_admin_username = st.text_input("New Admin Username", key="new_admin_username")
         new_admin_email = st.text_input("New Admin Email", key="new_admin_email")
         new_admin_password_hash = st.text_input("New Admin Hashed Password", key="new_admin_password_hash")
-        
+
         if st.button("Create New Admin", key="create_new_admin_button"):
             if new_admin_username and new_admin_email and new_admin_password_hash:
                 try:
@@ -1260,7 +1257,7 @@ def show_admin():
             total_convos_user = c.fetchone()[0]
             c.execute("SELECT COUNT(*) FROM messages")
             total_messages_user = c.fetchone()[0]
-        
+
         st.metric("Total User Conversations", total_convos_user)
         st.metric("Total User Messages", total_messages_user)
 
@@ -1292,7 +1289,7 @@ def show_admin():
             c = conn.cursor()
             c.execute("SELECT name, email, message, created_at FROM contacts ORDER BY created_at DESC")
             feedback = c.fetchall()
-        
+
         if not feedback:
             st.info("No user feedback submitted yet.")
         else:
@@ -1301,7 +1298,7 @@ def show_admin():
                 st.markdown(f"**Message**: {item[2]}")
                 st.markdown(f"**Date**: _{item[3].split('T')[0]}_")
                 st.markdown("---")
-    
+
     with tab4: # Plan Management
         st.subheader("Manage User Plans")
         st.markdown("Select a user to update their subscription plan and set an expiration date.")
@@ -1312,24 +1309,24 @@ def show_admin():
             non_admin_users = c.fetchall()
             c.execute("SELECT id, plan_name FROM pricing")
             all_plans = c.fetchall()
-        
+
         user_options = {f"{u[1]} ({u[2]})": u[0] for u in non_admin_users} 
         selected_user_display = st.selectbox("Select User", ["-- Select User --"] + list(user_options.keys()), key="select_user_for_plan")
-        
+
         if selected_user_display != "-- Select User --":
             selected_user_id = user_options[selected_user_display]
-            
+
             current_user_details = next((u for u in non_admin_users if u[0] == selected_user_id), None)
             if current_user_details:
                 current_plan_id = current_user_details[3]
                 current_expiration_date = current_user_details[4]
-                
+
                 st.write(f"Current Plan for **{selected_user_display}**: {plan_id_to_name.get(current_plan_id, 'N/A')}")
                 st.write(f"Current Expiration: {current_expiration_date if current_expiration_date else 'Never / N/A'}")
 
                 new_plan_name = st.selectbox("Assign New Plan", ["-- Select Plan --"] + [p[1] for p in all_plans], key="assign_new_plan") 
                 plan_name_to_id = {p[1]: p[0] for p in all_plans} 
-                
+
                 if new_plan_name != "-- Select Plan --":
                     new_plan_id = plan_name_to_id[new_plan_name]
 
@@ -1341,7 +1338,7 @@ def show_admin():
                         plan_duration_value = st.number_input("Number of Days", min_value=1, value=30, key="plan_duration_days")
                     elif duration_type == "Months":
                         plan_duration_value = st.number_input("Number of Months", min_value=1, value=1, key="plan_duration_months")
-                    
+
                     calculated_expiration_date = None
                     if duration_type == "Days" and plan_duration_value:
                         calculated_expiration_date = datetime.now() + timedelta(days=plan_duration_value)
@@ -1375,12 +1372,12 @@ def show_admin():
         """)
 
         new_pattern = st.text_area("New User Input Pattern", key="new_pattern_input")
-        
+
         intent_tags = sorted([tag for tag in GLOBAL_RESOURCES.get('intents', {}).keys()]) 
         selected_intent_tag = st.selectbox("Assign to Intent Category", ["-- Select Intent --"] + intent_tags, key="new_pattern_intent_select")
-        
+
         new_example_response = st.text_area("Example Bot Response (Optional, for logging)", key="new_response_input")
-        
+
         urgency_levels = ["low", "medium", "high", "critical"]
         selected_urgency = st.selectbox("Urgency Level (for logging)", urgency_levels, key="new_pattern_urgency")
 
@@ -1390,13 +1387,13 @@ def show_admin():
                     current_intents_yaml = load_yaml_cached(INTENTS_FILE)
                     if not current_intents_yaml:
                         current_intents_yaml = {'version': 1.0, 'type': 'intent_classification', 'last_updated': datetime.now().isoformat().split('T')[0], 'intents': []}
-                    
+
                     found_intent_obj = None
                     for intent_obj in current_intents_yaml.get('intents', []):
                         if intent_obj.get('tag') == selected_intent_tag:
                             found_intent_obj = intent_obj
                             break
-                    
+
                     if found_intent_obj:
                         if 'patterns' not in found_intent_obj:
                             found_intent_obj['patterns'] = []
@@ -1419,10 +1416,10 @@ def show_admin():
 
                     with open(INTENTS_FILE, 'w', encoding='utf-8') as f:
                         yaml.dump(current_intents_yaml, f, default_flow_style=False, sort_keys=False)
-                    
+
                     st.success(f"Pattern '{new_pattern}' added to '{selected_intent_tag}' in intents.yml!")
                     st.info("Remember: **Run `python3 train.py` and then restart this Streamlit app** for changes to take effect.")
-                    
+
                     st.session_state.new_pattern_input = ""
                     st.session_state.new_response_input = ""
                     st.session_state.new_pattern_intent_select = "-- Select Intent --" 
@@ -1449,7 +1446,7 @@ def main():
         st.session_state.current_user = {} 
     if 'is_admin' not in st.session_state:
         st.session_state.is_admin = False
-    
+
     if 'expected_next_action' not in st.session_state:
         st.session_state.expected_next_action = None 
 
@@ -1477,7 +1474,7 @@ def main():
         st.session_state.messages = [] 
         st.session_state.last_bot_message_type = None 
         st.session_state.expected_next_action = None 
-        
+
         if not st.session_state.initial_greeting_sent:
             greeting_responses = GLOBAL_RESOURCES.get('emotional_openers_responses', {}).get('general', ["Hello! How can I help you today?"])
             initial_message = random.choice(greeting_responses)
@@ -1487,7 +1484,7 @@ def main():
 
     with st.sidebar:
         st.title("📚 Kelly AI")
-        
+
         if st.session_state.logged_in:
             st.write(f"👋 Hello **{st.session_state.current_user.get('username', 'User')}**!")
             try:
@@ -1504,7 +1501,7 @@ def main():
                         WHERE u.id = ?
                     """, (user_id, user_id))
                     plan_info = c.fetchone()
-                    
+
                     if plan_info:
                         plan_name, convos, max_convos, plan_expiration_date = plan_info
                         st.markdown(f"Plan: **{plan_name}**")
@@ -1516,7 +1513,7 @@ def main():
                 st.write("Plan info: N/A")
         else:
             st.write("👤 Status: **Anonymous User**")
-        
+
         st.markdown("---")
 
         if st.session_state.page == "landing": 
@@ -1531,7 +1528,7 @@ def main():
             st.button("ℹ️ About", key="nav_about", on_click=lambda: setattr(st.session_state, 'page', "about"))
             if st.session_state.is_admin:
                 st.button("👑 Admin", key="nav_admin", on_click=lambda: setattr(st.session_state, 'page', "admin"))
-            
+
             st.markdown("---") 
             if not st.session_state.logged_in:
                 st.button("🔑 Login", key="nav_login", on_click=lambda: setattr(st.session_state, 'page', "login"))
@@ -1543,7 +1540,7 @@ def main():
                     st.session_state.page = "landing" 
                     st.session_state.initial_greeting_sent = False 
                     st.rerun()
-    
+
     if st.session_state.page == "landing":
         show_landing_page()
     elif st.session_state.page == "chat_page": 
